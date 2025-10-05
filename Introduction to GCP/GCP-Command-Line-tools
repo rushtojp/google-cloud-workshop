@@ -1,0 +1,124 @@
+The command-line tools for Google Cloud Platform (GCP) are collectively known as the Google Cloud CLI (Command Line Interface), which was formerly called the Google Cloud SDK (Software Development Kit).
+
+This is a set of tools that you install on your local machine to manage GCP resources and services directly from your terminal. It's essential for automation, scripting, and anyone who prefers working on the command line.
+
+
+The Google Cloud CLI includes several key components. Here are the most important ones:
+
+1. gcloud
+This is the primary and most important command-line tool. It's your main entry point for managing almost everything on GCP. The gcloud command has a consistent and predictable structure:
+
+gcloud <component> <resource> <action> [flags]
+
+What it's for:
+
+Authentication: Logging into your Google Cloud account (gcloud auth login).
+
+Project Management: Listing and switching between your GCP projects (gcloud projects list, gcloud config set project <PROJECT_ID>).
+
+Compute Engine: Creating, deleting, and managing Virtual Machines (gcloud compute instances create ...).
+
+Google Kubernetes Engine (GKE): Managing Kubernetes clusters (gcloud container clusters create ...).
+
+App Engine: Deploying applications (gcloud app deploy).
+
+Cloud Functions: Deploying and managing serverless functions (gcloud functions deploy ...).
+
+IAM: Managing user roles and permissions (gcloud projects add-iam-policy-binding ...).
+
+And much more, covering hundreds of services.
+
+Example Commands:
+
+Initialize your GCP configuration:
+
+Bash
+
+gcloud init
+Create a new VM instance:
+
+Bash
+
+gcloud compute instances create my-vm --machine-type=e2-medium --zone=us-central1-a
+List your GKE clusters:
+
+Bash
+
+gcloud container clusters list
+2. gsutil
+This tool is specifically for interacting with Google Cloud Storage (GCS). It provides a simple, powerful command-line interface for managing your storage buckets and objects, with a syntax that feels very similar to Linux commands like cp, ls, and rm.
+
+What it's for:
+
+Creating and deleting storage buckets.
+
+Uploading, downloading, and deleting objects (files).
+
+Listing the contents of buckets.
+
+Managing permissions and access control lists (ACLs) on objects and buckets.
+
+Performing large, parallel data transfers.
+
+Example Commands:
+
+Create a new storage bucket:
+
+Bash
+
+gsutil mb gs://my-new-bucket
+Copy a local file to a bucket:
+
+Bash
+
+gsutil cp my-local-file.txt gs://my-new-bucket/
+List the contents of a bucket:
+
+Bash
+
+gsutil ls gs://my-new-bucket
+Important Note: While gsutil is still widely used and supported, Google is now recommending the use of gcloud storage commands for interacting with Cloud Storage. The new commands are integrated directly into gcloud, offer improved performance, and have a more consistent flag syntax. For example, gsutil cp is equivalent to gcloud storage cp.
+
+3. bq
+This is the command-line tool for Google BigQuery, Google's serverless data warehouse. It allows you to run queries, manage datasets, and load data without leaving your terminal.
+
+
+What it's for:
+
+Running SQL queries on your data.
+
+Loading data into BigQuery tables from files or Cloud Storage.
+
+Creating, deleting, and managing datasets, tables, and views.
+
+Exporting data from BigQuery tables.
+
+Example Commands:
+
+Run a query:
+
+Bash
+
+bq query --use_legacy_sql=false 'SELECT name, SUM(number) as total FROM `bigquery-public-data.usa_names.usa_1910_2013` WHERE state = "TX" GROUP BY name ORDER BY total DESC LIMIT 10'
+Load data from a CSV file in Cloud Storage into a new table:
+
+Bash
+
+bq load mydataset.mytable gs://my-bucket/data.csv name:string,age:integer
+Other Bundled Tools
+The Google Cloud CLI also installs other useful tools, including:
+
+kubectl: This is the standard open-source command-line tool for interacting with Kubernetes clusters. The gcloud tool automatically configures kubectl to authenticate with your GKE clusters, making it seamless to manage your containerized applications.
+
+gke-gcloud-auth-plugin: A helper utility required for kubectl to authenticate with GKE clusters. You typically don't interact with it directly, but gcloud installs and manages it for you.
+
+Summary Table
+Tool	Primary Purpose	Example Use Case
+gcloud	Main tool for managing most GCP services.	Create a VM, deploy an app, manage users.
+gsutil	Managing Google Cloud Storage (buckets & objects).	Upload a file, create a bucket, set permissions.
+bq	Interacting with the BigQuery data warehouse.	Run a SQL query, load data into a table.
+kubectl	Managing Kubernetes clusters (especially GKE).	Deploy a container, inspect cluster nodes.
+
+Export to Sheets
+How to Get Them
+You get all these tools by installing the Google Cloud CLI. You can find the installation instructions on the official Google Cloud documentation page. The installer is available for Windows, macOS, and Linux. After installation, you run gcloud init to connect it to your account.
