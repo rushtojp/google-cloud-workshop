@@ -1,0 +1,57 @@
+Here's a guide on how to get your free Google Cloud account set up.
+
+Setting Up Your Free Google Cloud Account
+This guide will walk you through creating a Google Cloud account, which comes with a $300 credit for 90 days and access to an "Always Free" tier of services.
+
+What you'll need:
+
+A standard Google account (like your Gmail).
+
+A credit or debit card. (This is only for identity verification; you won't be charged unless you manually upgrade to a paid plan later).
+
+1. Getting Started
+First, head over to the Google Cloud free page: cloud.google.com/free
+
+Click the big blue button that says “Get started for free”. It will ask you to log in with your Google account if you haven't already.
+
+2. Basic Info
+The first screen is simple. Just confirm your country and agree to the terms of service. Click continue. You'll then be asked to verify your phone number with a code sent via SMS.
+
+3. The Payment Verification Step
+This is the part that worries some people, but it's straightforward. Google asks for payment details to make sure you're a real person and not a bot creating endless trial accounts.
+
+Account Type: Choose "Individual".
+
+Payment Details: Enter your card number, name, and address. Make sure the details match what your bank has on file.
+
+Again, Google will not charge you. They place a temporary authorization hold for a tiny amount (like $1 or less) that is automatically refunded within a few days.
+
+Once you fill this out, click “Start my free trial”.
+
+4. You're In!
+After the verification, you’ll be taken to the Google Cloud Console. This is your main dashboard where you can start creating virtual machines, databases, storage buckets, and more.
+
+What You Get & How to Manage Costs
+Your new account comes with two benefits:
+
+$300 Free Trial Credit: You have 90 days to use $300 on pretty much any service you want. This is great for trying out more powerful features.
+
+Always Free Tier: After your trial ends, you can still use a certain amount of specific services for free every month. This includes a small e2-micro virtual machine, 5 GB of storage, and more. It's perfect for small personal projects.
+
+A crucial tip to avoid any surprise bills:
+
+Your account is set to not automatically bill you after the trial. You have to manually click an "Upgrade" button to become a paid customer.
+
+For extra safety, set up a billing alert.
+
+From the main menu (☰), go to Billing.
+
+On the left menu, find and click on Budgets & alerts.
+
+Click Create Budget.
+
+Set a budget amount of just $1.
+
+Set it to send you an email alert when 100% of that budget is used.
+
+This way, if your usage ever goes beyond the free limits, you’ll get an email immediately and can decide what to do next.
