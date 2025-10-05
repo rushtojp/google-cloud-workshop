@@ -1,0 +1,108 @@
+Step by step procedure to create a web server in google cloud environment
+
+Here is a single, powerful command you can run directly in Google Cloud Shell to create a Google Compute Engine VM, install Apache, and open it to web traffic.
+
+The Quick Command
+Copy and paste this command directly into your Google Cloud Shell terminal and press Enter.
+
+Bash
+
+gcloud compute instances create my-apache-server \
+    --project=$(gcloud config get-value project) \
+    --zone=us-central1-a \
+    --machine-type=e2-medium \
+    --image-family=debian-11 \
+    --image-project=debian-cloud \
+    --tags=http-server \
+    --metadata=startup-script='#! /bin/bash
+      sudo apt-get update
+      sudo apt-get install -y apache2
+      sudo systemctl start apache2
+      sudo systemctl enable apache2
+      echo "<h1>Hello from your new Apache VM!</h1>" | sudo tee /var/www/html/index.html' && \
+gcloud compute firewall-rules create default-allow-http \
+    --direction=INGRESS \
+    --priority=1000 \
+    --network=default \
+    --action=ALLOW \
+    --rules=tcp:80 \
+    --source-ranges=0.0.0.0/0 \
+    --target-tags=http-server
+Step-by-Step Breakdown of the Command
+Let's break down what each part of that command does.
+
+1. Creating the VM Instance
+gcloud compute instances create my-apache-server
+
+This is the core command to create a new virtual machine instance named my-apache-server.
+
+--project=$(gcloud config get-value project)
+
+This automatically uses your currently configured Google Cloud project ID.
+
+--zone=us-central1-a
+
+This specifies the geographical location where your VM will live. You can change this to a zone closer to you (e.g., europe-west2-a, asia-south1-b).
+
+--machine-type=e2-medium
+
+This defines the CPU and RAM for your VM (2 vCPUs, 4 GB RAM). For a small test, you could use e2-micro.
+
+--image-family=debian-11 --image-project=debian-cloud
+
+This tells GCP to use a fresh, stable image of Debian 11 as the operating system.
+
+--tags=http-server
+
+This applies a network tag called http-server to the VM. This tag is crucial because the firewall rule will use it to identify which VMs should be accessible from the internet.
+
+--metadata=startup-script='...'
+
+This is the most important part for automation. It passes a script that runs automatically the first time your VM boots up.
+
+#! /bin/bash: Specifies it's a bash script.
+
+sudo apt-get update: Refreshes the package lists.
+
+sudo apt-get install -y apache2: Installs the Apache web server software without asking for confirmation.
+
+sudo systemctl start apache2 & sudo systemctl enable apache2: Starts Apache and ensures it automatically starts on future reboots.
+
+echo "..." | sudo tee /var/www/html/index.html: Creates a simple custom homepage for your web server.
+
+2. Creating the Firewall Rule
+&& gcloud compute firewall-rules create default-allow-http ...
+
+The && ensures this command only runs if the VM creation was successful.
+
+This command creates a firewall rule named default-allow-http.
+
+--action=ALLOW --rules=tcp:80: It allows incoming traffic (INGRESS) on TCP port 80, which is the standard port for HTTP.
+
+--source-ranges=0.0.0.0/0: This allows traffic from any IP address on the internet.
+
+--target-tags=http-server: This applies the rule only to VMs that have the http-server tag, which we added to our VM in the previous step.
+
+How to Verify It Worked
+Wait for the command to finish. It will take a minute or two to provision the resources.
+
+Get the External IP Address. The command output will list the EXTERNAL_IP of your new VM. If you miss it, you can get it anytime with:
+
+Bash
+
+gcloud compute instances describe my-apache-server --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+Test in your browser. Open a new tab in your web browser and navigate to the IP address:
+
+http://<YOUR_EXTERNAL_IP>
+You should see the message: Hello from your new Apache VM!
+
+How to Clean Up (Important!)
+To avoid incurring charges, delete the resources when you're done. Run these commands in your Cloud Shell:
+
+Bash
+
+# Delete the VM instance
+gcloud compute instances delete my-apache-server --zone=us-central1-a
+
+# Delete the firewall rule
+gcloud compute firewall-rules delete default-allow-http
