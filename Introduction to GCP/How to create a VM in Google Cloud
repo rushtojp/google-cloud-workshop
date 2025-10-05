@@ -1,0 +1,106 @@
+Step-by-Step Procedure to create VM in Google Cloud
+
+step-by-step procedure to create a Virtual Machine (VM) instance in Google Cloud Platform (GCP). In Google Cloud, a VM is officially called a Compute Engine instance.
+
+This guide will focus on using the user-friendly Google Cloud Console.
+
+Prerequisites
+A Google Account: You need a standard Google account (like a Gmail account).
+
+A Google Cloud Project: You need a project set up with billing enabled. When you first sign up for Google Cloud, you are guided through creating a project and setting up your free trial or billing information.
+
+Step-by-Step Procedure to Create a VM
+Step 1: Navigate to the Google Cloud Console
+Open your web browser and go to the Google Cloud Console: https://console.cloud.google.com/
+
+Log in with your Google Account if you aren't already.
+
+Make sure the correct project is selected. You can see and change the current project in the top bar of the console, next to the "Google Cloud" logo.
+
+Step 2: Go to the Compute Engine Service
+Click the Navigation menu (the "hamburger" icon with three horizontal lines) in the top-left corner.
+
+Hover over or scroll down to Compute.
+
+Click on Compute Engine. This will take you to the Compute Engine dashboard.
+
+If this is your first time using Compute Engine, you may need to wait a minute for the API to be enabled.
+
+Step 3: Start the VM Instance Creation Process
+On the Compute Engine dashboard, click the CREATE INSTANCE button. This will open the main configuration page for your new VM.
+
+Step 4: Configure Your VM Instance
+This is the most important step, where you define the specifications of your virtual machine.
+
+Name: Give your VM a unique, descriptive name (e.g., web-server-1, test-vm-dev). The name must be lowercase letters, numbers, and hyphens.
+
+Region and Zone:
+
+Region: This is the geographical location where your VM will be hosted (e.g., us-central1 for Iowa, asia-south1 for Mumbai). Choose a region that is close to you or your users to reduce latency.
+
+Zone: This is an isolated location within a region (e.g., us-central1-a). Think of it as a specific data center building. For a single VM, you can usually leave the default zone.
+
+Machine Configuration (CPU and Memory):
+
+Series: For general purposes, the E2 series is the most cost-effective. N2 and other series offer different performance characteristics.
+
+Machine type: This defines the number of virtual CPUs (vCPUs) and the amount of RAM. A good starting point for small projects is e2-micro (shared vCPU) or e2-small. For a basic web server, e2-medium (2 vCPU, 4 GB RAM) is a solid choice. Google provides an estimated monthly cost on the right side of the page that updates as you make changes.
+
+Boot Disk (Operating System):
+
+This is the operating system that your VM will run. The default is usually a recent version of Debian GNU/Linux.
+
+To change it, click the CHANGE button.
+
+You can select from many public images, including:
+
+Ubuntu
+
+CentOS
+
+Red Hat Enterprise Linux (RHEL)
+
+Windows Server (Note: Windows licenses cost extra)
+
+You can also change the disk type (e.g., Standard, SSD) and size. For most basic uses, the default 10 GB is fine.
+
+Firewall (Network Access):
+
+This is a crucial step for allowing traffic to your VM.
+
+If you plan to run a web server, you must check the boxes for:
+
+Allow HTTP traffic (for port 80)
+
+Allow HTTPS traffic (for port 443)
+
+If you leave these unchecked, you will not be able to access any websites hosted on the VM from the internet.
+
+Advanced Options (Optional for beginners):
+
+You can expand the "Advanced options" section to configure networking, security keys, startup scripts, and more. For a basic setup, you can ignore this for now.
+
+Step 5: Create the VM
+Review your settings and the estimated monthly cost.
+
+Click the blue CREATE button at the bottom of the page.
+
+Google Cloud will now provision and start your virtual machine. This usually takes less than a minute. You will be taken back to the Compute Engine dashboard, where you will see your new VM instance in the list with a spinning icon, which will turn into a green checkmark once it's ready.
+
+Step 6: Connect to Your VM
+Once your VM instance has a green checkmark, it is running and ready for you to use.
+
+In the VM instances list, find your newly created VM.
+
+In the "Connect" column, you will see an SSH link.
+
+Clicking SSH will open a secure terminal connection to your Linux VM directly in your web browser. There is no need to manage SSH keys for this basic method.
+
+You now have a fully functional command-line terminal for your new cloud server!
+
+Cleaning Up (Important!)
+To avoid incurring ongoing charges, you should stop or delete your VM when you are finished with it.
+
+To Stop a VM: Select the checkbox next to your VM name and click the STOP button at the top of the page. This stops the VM, and you are no longer charged for vCPU and RAM, but you are still charged for the storage of the boot disk.
+
+To Delete a VM: Select the checkbox and click the DELETE button. This permanently removes the VM and its boot disk, stopping all charges associated with it.
