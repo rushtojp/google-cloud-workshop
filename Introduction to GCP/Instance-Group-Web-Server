@@ -1,0 +1,238 @@
+Here is a detailed, step-by-step procedure to create a scalable group of Apache web servers in Google Cloud Platform (GCP) using a Managed Instance Group (MIG) and a Load Balancer.
+
+Objective
+We will create a resilient and auto-scaling web server setup. This architecture will automatically:
+
+Distribute incoming traffic across multiple virtual machines (VMs).
+
+Heal itself by replacing unhealthy VMs.
+
+Scale the number of VMs up or down based on load.
+
+Core Components We Will Create
+Instance Template: A blueprint that defines the properties of each VM instance, including machine type, boot disk, and a startup script to install Apache.
+
+Managed Instance Group (MIG): A group of identical VM instances created from the Instance Template. It manages autoscaling, auto-healing, and updates.
+
+Health Check: A probe to determine if the Apache server on an instance is responding correctly. The MIG uses this for auto-healing.
+
+Firewall Rule: A rule to allow HTTP traffic from the internet to our VMs.
+
+HTTP(S) Load Balancer: An external entry point that receives all user traffic and distributes it to the healthy instances in our MIG.
+
+Step-by-Step Procedure
+Step 1: Create the Instance Template
+This template is the "master recipe" for each of your web server VMs.
+
+In the Google Cloud Console, navigate to the main menu (☰) -> Compute Engine -> Instance templates.
+
+Click CREATE INSTANCE TEMPLATE.
+
+Name: Give it a descriptive name, like apache-template-v1.
+
+Machine configuration:
+
+Series: E2
+
+Machine type: e2-micro or e2-small (This is fine for a demo; choose a larger size for production).
+
+Boot disk:
+
+Click Change.
+
+Operating system: Debian
+
+Version: Debian GNU/Linux 11 (bullseye) or the latest stable version.
+
+Click Select.
+
+Identity and API access: Leave the defaults.
+
+Firewall:
+
+Check Allow HTTP traffic. This automatically applies a network tag (http-server), which we will use later.
+
+Advanced options: Expand this section.
+
+Click on Management.
+
+Scroll down to the Automation section and find the Startup script field.
+
+Paste the following script. This script will run every time a new VM is created from this template. It updates the OS, installs Apache, and creates a basic, unique homepage for each server.
+
+Bash
+
+#!/bin/bash
+apt-get update
+apt-get install -y apache2
+systemctl start apache2
+systemctl enable apache2
+VM_HOSTNAME=$(hostname)
+echo "<h1>Hello from Apache Server on $VM_HOSTNAME</h1>" > /var/www/html/index.html
+Click Create.
+
+Step 2: Create the Managed Instance Group (MIG)
+Now, we'll use the template to create a group that can scale and heal itself.
+
+In the Google Cloud Console, navigate to Compute Engine -> Instance groups.
+
+Click CREATE INSTANCE GROUP.
+
+Name: Give it a name, like apache-instance-group.
+
+Instance template: Select the apache-template-v1 you just created.
+
+Location:
+
+Select Multiple zones. This provides higher availability.
+
+Region: Choose a region close to you (e.g., us-central1).
+
+Zones: Select at least two zones from the dropdown.
+
+Autoscaling:
+
+Autoscaling mode: Select On: add and remove instances to the group.
+
+Minimum number of instances: 2 (This ensures you always have at least two running for high availability).
+
+Maximum number of instances: 5 (The group will not scale beyond this number).
+
+Autoscaling signals:
+
+Click ADD SIGNAL.
+
+Signal type: CPU utilization.
+
+Target CPU utilization: Set it to 60 (meaning if the average CPU usage goes above 60%, the group will add new instances).
+
+Click Done.
+
+Autohealing:
+
+This is where we define how the group detects a failed server.
+
+Health check: Click the dropdown and select Create a health check.
+
+Name: apache-http-health-check
+
+Protocol: HTTP
+
+Port: 80
+
+Leave the other settings (Check interval, Timeout, etc.) as their defaults for now.
+
+Click Save and Continue.
+
+Click Create. The MIG will now start creating your initial two VM instances based on the template. This might take a few minutes.
+
+Step 3: Create the Firewall Rule (If Not Done by Template)
+Although we selected "Allow HTTP traffic" in the template, it's good practice to know how to create the firewall rule manually. If you did check the box, this rule already exists. If not, follow these steps.
+
+Navigate to VPC network -> Firewall.
+
+Click CREATE FIREWALL RULE.
+
+Name: allow-http-internet
+
+Network: default
+
+Direction of traffic: Ingress (incoming).
+
+Action on match: Allow.
+
+Targets:
+
+Select Specified target tags.
+
+Target tags: Enter http-server (this is the default tag applied by the "Allow HTTP traffic" checkbox in the template).
+
+Source filter:
+
+Select IPv4 ranges.
+
+Source IPv4 ranges: 0.0.0.0/0 (This means "allow traffic from any IP address on the internet").
+
+Protocols and ports:
+
+Select Specified protocols and ports.
+
+Check TCP and enter port 80.
+
+Click Create.
+
+Step 4: Create the External HTTP Load Balancer
+This provides a single, stable IP address for your users and distributes traffic to your instance group.
+
+Navigate to Network Services -> Load balancing.
+
+Click CREATE LOAD BALANCER.
+
+Under HTTP(S) Load Balancing, click START CONFIGURATION.
+
+Internet facing or internal only: Select From Internet to my VMs or serverless services.
+
+Global or single region: Select Global External HTTP(S) Load Balancer (classic). Click Continue.
+
+Name: Give the load balancer a name, like apache-web-lb.
+
+Frontend configuration:
+
+This is the public-facing side of the load balancer.
+
+Click ADD FRONTEND IP AND PORT.
+
+Name: http-frontend-config
+
+Protocol: HTTP
+
+IP address: Click the dropdown and select Create IP address. Name it web-static-ip and click Reserve. This gives you a permanent, static IP.
+
+Port: 80
+
+Click Done.
+
+Backend configuration:
+
+This is where the traffic is sent.
+
+Click the dropdown Backend services & backend buckets and select CREATE A BACKEND SERVICE.
+
+Name: apache-backend-service
+
+Backend type: Instance group
+
+New backend:
+
+Instance group: Select the apache-instance-group you created earlier.
+
+Port numbers: 80
+
+Health Check: Select the apache-http-health-check you created.
+
+Click Create.
+
+Routing rules:
+
+This section is simple for our setup. It ensures that all traffic coming to the frontend goes to the backend we just configured. The default settings are fine.
+
+Review and finalize:
+
+Review the settings on the left. You should have a frontend and a backend configured.
+
+Click Create. It can take several minutes for the load balancer to be provisioned.
+
+Step 5: Test Your Setup
+Go back to the Load balancing page.
+
+Click on the name of your new load balancer (apache-web-lb).
+
+In the details screen, find the public IP address listed in the Frontend section.
+
+Copy this IP address and paste it into a new tab in your web browser.
+
+You should see the message: "Hello from Apache Server on [hostname]", where [hostname] is the name of one of your VMs (e.g., apache-instance-group-abcd).
+
+Refresh the page multiple times. You should see the hostname change as the load balancer distributes your requests between the two different VM instances.
+
+Congratulations! You have successfully created a scalable, self-healing group of Apache web servers on Google Cloud.
