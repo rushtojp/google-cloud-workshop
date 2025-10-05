@@ -1,0 +1,221 @@
+Here is a detailed, step-by-step procedure to create a basic web server on Google Cloud Platform (GCP) using a Compute Engine Virtual Machine (VM) and access it from the internet.
+
+We will set up a Linux VM and install the popular Apache web server.
+
+Prerequisites
+A Google Account: You need a Google account (like a Gmail account) to access Google Cloud.
+
+Google Cloud Project: You need a project set up in the Google Cloud Console. If you're new, Google offers a generous free tier and free credits to get started. You will need to enable billing for the project, but you will likely stay within the free tier for this simple setup.
+
+Part 1: Creating the Virtual Machine (VM) Instance
+The VM is the virtual computer in the cloud that will act as your server.
+
+Step 1: Navigate to Compute Engine
+Go to the Google Cloud Console: https://console.cloud.google.com/
+
+In the top-left corner, click the Navigation menu (☰).
+
+Scroll down and select Compute Engine, then click on VM instances.
+
+Step 2: Start Creating a New Instance
+If this is your first time, you may need to enable the Compute Engine API. Just follow the on-screen prompts.
+
+Click the CREATE INSTANCE button at the top of the page.
+
+Step 3: Configure the VM Instance
+You will now see a configuration page. Here are the key settings to choose:
+
+Name: Give your VM a descriptive name, for example, my-web-server.
+
+Region and Zone:
+
+Region: Choose a geographic location close to your users to reduce latency (e.g., asia-south1 for Mumbai).
+
+Zone: Choose any zone within that region (e.g., asia-south1-a).
+
+Machine Configuration:
+
+Series: For a simple website, E2 is a cost-effective choice.
+
+Machine type: e2-micro or e2-small is perfect for a basic web server and is usually covered by the GCP Free Tier.
+
+Boot Disk: This is the operating system for your server.
+
+Click the Change button.
+
+Operating System: Select Debian or Ubuntu. Both are excellent choices. Let's choose Debian.
+
+Version: Choose the latest stable version (e.g., Debian GNU/Linux 12 "Bookworm").
+
+Click Select.
+
+Firewall (Crucial Step for External Access):
+
+Under the "Firewall" section, check both boxes:
+
+Allow HTTP traffic (This opens port 80 for standard web traffic)
+
+Allow HTTPS traffic (This opens port 443 for secure web traffic)
+
+This step automatically creates firewall rules to let visitors access your website.
+
+Step 4: Create the VM
+Review your settings.
+
+Click the Create button at the bottom of the page. Google Cloud will now provision and start your virtual machine. This usually takes a minute or two.
+
+Part 2: Installing the Web Server Software
+Now that your VM is running, you need to connect to it and install the software that serves web pages (Apache).
+
+Step 5: Connect to Your VM via SSH
+On the VM instances page, you will see your new server (my-web-server) in the list.
+
+In the Connect column for your VM, click the SSH button.
+
+This will open a new browser window with a command-line terminal connected directly to your server.
+
+Step 6: Update Your Server's Package List
+Before installing new software, it's always best practice to update the list of available packages. Type the following command and press Enter:
+
+Bash
+
+sudo apt update
+sudo gives you administrative (root) privileges.
+
+apt is the package manager for Debian/Ubuntu.
+
+Step 7: Install Apache2
+Now, install the Apache web server software. The -y flag automatically answers "yes" to the installation prompt.
+
+Bash
+
+sudo apt install apache2 -y
+Step 8: Verify Apache is Running (Optional)
+You can check the status of the Apache service to make sure it installed and started correctly.
+
+Bash
+
+sudo systemctl status apache2
+You should see output indicating the service is active (running). You can press q to exit the status view.
+
+Part 3: Accessing Your Web Server Externally
+This is the final step to see your web server in action from any computer on the internet.
+
+Step 9: Find Your Server's External IP Address
+Go back to the VM instances page in the Google Cloud Console.
+
+Find your VM in the list. The IP address will be listed in the External IP column. It will look something like 34.93.221.150.
+
+Copy this IP address.
+
+Step 10: Visit Your New Website!
+Open a new tab in your web browser.
+
+In the address bar, type http:// followed by the external IP address you just copied. For example: http://34.93.221.150
+
+Press Enter.
+
+You should now see the default "Apache2 Debian Default Page". This page is being served directly from your new Google Cloud VM!
+
+Congratulations! You have successfully created a web server in Google Cloud and accessed it externally.
+
+Important Next Steps
+Upload Your Own Website: To replace the default Apache page, you need to upload your own HTML, CSS, and JavaScript files to the /var/www/html/ directory on your server. You can use tools like gcloud compute scp or an SFTP client (like FileZilla) to transfer files.
+
+Get a Static IP Address: The external IP address assigned by default is ephemeral, meaning it can change if you stop and restart the VM. For a real website, you should reserve a Static IP address and assign it to your VM. You can do this in the GCP Console under VPC network > IP addresses.
+
+Set Up a Domain Name: Instead of using an IP address, you'll want a domain name (e.g., www.yourwebsite.com). After buying a domain from a registrar, you need to point its DNS 'A' record to your server's static external IP address.
+
+Part 4: Adding Your Own HTML File and Accessing It
+So far, you are seeing the default Apache welcome page. Now, let's create a new page called hello.html and serve it.
+
+Step 11: Connect to Your VM via SSH
+If you have closed the SSH window from before, reconnect to it.
+
+Go to the VM instances page in the Google Cloud Console.
+
+Find your my-web-server instance.
+
+Click the SSH button to open the command-line terminal.
+
+Step 12: Navigate to the Web Root Directory
+Apache serves files from a specific directory. On Debian and Ubuntu, the default directory is /var/www/html.
+
+Use the cd (change directory) command to move into that folder:
+
+Bash
+
+cd /var/www/html
+You can list the files in this directory to see what's there. You should see the default index.html page.
+
+Bash
+
+ls -l
+Step 13: Create a New HTML File with nano
+We will use nano, a simple and easy-to-use command-line text editor, to create our new file.
+
+To create and open a new file named hello.html, run the following command. We use sudo because this directory is owned by the root user, and you need administrator privileges to create files in it.
+
+Bash
+
+sudo nano hello.html
+Your terminal window will now transform into a basic text editor.
+
+Step 14: Add HTML Content
+You can now type or paste your HTML content directly into the nano editor.
+
+Copy the simple HTML code below and paste it into the terminal window (to paste in the browser SSH terminal, you can often use Ctrl+Shift+V or right-click).
+
+HTML
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My GCP Page</title>
+  <style>
+    body { font-family: sans-serif; background-color: #f0f8ff; text-align: center; margin-top: 50px; }
+    h1 { color: #4285F4; } /* Google Blue */
+    p  { color: #34A853; } /* Google Green */
+  </style>
+</head>
+<body>
+  <h1>Hello from Bengaluru!</h1>
+  <p>This custom page is being served live from my Google Cloud server.</p>
+</body>
+</html>
+Step 15: Save the File and Exit nano
+Press Ctrl + X to exit the editor.
+
+The editor will ask Save modified buffer?. Press the Y key for Yes.
+
+It will then ask File Name to Write: hello.html. Press Enter to confirm.
+
+Step 16: Verify the File Was Created (Optional)
+You are now back at the command prompt. If you list the files again, you will see your new file alongside the original one.
+
+Bash
+
+ls -l
+You should see both index.html and hello.html listed.
+
+Accessing Your New HTML Page
+Now for the final step! Let's access this specific page from your browser.
+
+Step 17: Open the New Page in Your Browser
+Find your server's External IP address again from the GCP VM instances page.
+
+Open a new browser tab.
+
+In the address bar, type http://, your external IP, a forward slash /, and your new filename: hello.html.
+It should look like this:
+http://<YOUR_EXTERNAL_IP>/hello.html
+
+For example, if your IP is 34.93.221.150, you would navigate to:
+http://34.93.221.150/hello.html
+
+You will now see your custom HTML page with the "Hello from Bengaluru!" message, served directly from your Google Cloud web server!
+
+Why did this work?
+When you navigate to just the IP address (http://34.93.221.150), a web server will, by default, look for a file named index.html or index.htm and serve it automatically. That's why you saw the Apache default page.
+
+When you add a specific filename to the URL (/hello.html), you are telling the web server to ignore the default and serve that exact file instead.
