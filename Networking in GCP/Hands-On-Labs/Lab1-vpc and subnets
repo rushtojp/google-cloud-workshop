@@ -1,0 +1,71 @@
+Prerequisites
+Google Cloud Platform (GCP) Account: You need an active GCP account with billing enabled.
+
+A GCP Project: Create a new project or use an existing one.
+
+gcloud CLI: Have the Google Cloud SDK installed and authenticated on your local machine, or use the Cloud Shell in the GCP console.
+
+(For Lab 3 Only) A Registered Domain Name: You will need access to a domain you own to configure its DNS settings.
+
+Lab Setup: Configure Your Environment
+Open your terminal or Cloud Shell and run these commands to set your project and default region/zone. This will save you from typing them in every command.
+
+Bash
+
+# Set your Project ID
+gcloud config set project [YOUR_PROJECT_ID]
+
+# Set a default region and zone
+gcloud config set compute/region us-central1
+gcloud config set compute/zone us-central1-a
+Replace [YOUR_PROJECT_ID] with your actual GCP Project ID.
+
+Lab 1: VPC and Subnets
+Objective: Create an isolated network environment for your resources, moving away from the default VPC.
+
+Step 1: Create a Custom VPC Network
+A custom-mode VPC gives you full control over its subnets and IP ranges.
+
+Bash
+
+gcloud compute networks create my-custom-vpc --subnet-mode=custom
+my-custom-vpc: This is the name of your new virtual network.
+
+--subnet-mode=custom: Specifies that we will create our own subnets.
+
+Step 2: Create a Subnet
+A subnet is a segmented piece of a VPC, partitioned to a specific region with its own IP address range.
+
+Bash
+
+gcloud compute networks subnets create web-subnet \
+  --network=my-custom-vpc \
+  --range=10.0.1.0/24 \
+  --region=us-central1
+web-subnet: The name for our subnet in the us-central1 region.
+
+--network: Attaches this subnet to the VPC we created.
+
+--range: Defines the internal IP address range for resources in this subnet.
+
+Step 3: Create Firewall Rules
+By default, all ingress traffic is denied. We need to create rules to allow specific traffic.
+
+Allow SSH (port 22) for administration:
+
+Bash
+
+gcloud compute firewall-rules create allow-ssh \
+  --network=my-custom-vpc \
+  --allow=tcp:22 \
+  --source-ranges=0.0.0.0/0
+Allow HTTP (port 80) for our web servers:
+
+Bash
+
+gcloud compute firewall-rules create allow-http \
+  --network=my-custom-vpc \
+  --allow=tcp:80 \
+  --source-ranges=0.0.0.0/0 \
+  --target-tags=web-server
+--target-tags=web-server: This is important. This rule will only apply to Virtual Machines (VMs) that we "tag" with web-server.
