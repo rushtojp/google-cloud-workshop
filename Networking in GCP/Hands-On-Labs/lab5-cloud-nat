@@ -1,0 +1,60 @@
+Lab 5: Cloud NAT
+Objective: Create a VM with no public IP address and grant it outbound internet access using Cloud NAT. This is a common security practice.
+
+Step 1: Create a VM Without a Public IP Address
+
+Bash
+
+gcloud compute instances create private-vm \
+    --network=my-custom-vpc \
+    --subnet=web-subnet \
+    --no-address
+--no-address is the key flag that prevents it from getting a public IP.
+
+Step 2: Verify It Has No Internet Access
+SSH into the new private-vm. The gcloud command will use an internal relay to connect you.
+
+Bash
+
+gcloud compute ssh private-vm
+Once inside the VM, try to reach the internet. This command will hang and eventually time out.
+
+Bash
+
+# This will fail
+sudo apt-get update
+Type exit to leave the SSH session.
+
+Step 3: Create a Cloud Router
+Cloud NAT requires a Cloud Router in the same region as the subnet it serves.
+
+Bash
+
+gcloud compute routers create my-nat-router \
+    --network=my-custom-vpc \
+    --region=us-central1
+Step 4: Configure Cloud NAT
+Now, create the NAT configuration on the router.
+
+Bash
+
+gcloud compute routers nats create my-cloud-nat \
+    --router=my-nat-router \
+    --auto-allocate-nat-external-ips \
+    --nat-all-subnet-ip-ranges \
+    --region=us-central1
+This rule tells the NAT gateway to serve all IP ranges in the us-central1 region of our VPC and to automatically provision public IPs for outbound traffic.
+
+Step 5: Verify Internet Access Again
+SSH back into the private-vm:
+
+Bash
+
+gcloud compute ssh private-vm
+Now, run the same command as before.
+
+Bash
+
+# This will now succeed!
+sudo apt-get update
+The command will now successfully connect to the package repositories, proving that Cloud NAT is providing outbound internet connectivity.
