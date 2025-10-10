@@ -1,0 +1,49 @@
+Lab 3: Cloud DNS
+Objective: Map a user-friendly domain name to the load balancer's IP address.
+
+Prerequisite: You must own a domain name (e.g., your-cool-domain.com).
+
+Step 1: Create a Cloud DNS Managed Zone
+A managed zone holds all DNS records for a single domain.
+
+Bash
+
+gcloud dns managed-zones create my-lab-zone \
+  --dns-name="[YOUR_DOMAIN_NAME]." \
+  --description="DNS zone for my lab"
+Replace [YOUR_DOMAIN_NAME] with your domain (e.g., your-cool-domain.com). Note the trailing dot (.).
+
+Step 2: Get Your Zone's Name Servers (NS Records)
+You need to tell your domain registrar to use Google's name servers.
+
+Bash
+
+gcloud dns managed-zones describe my-lab-zone
+Look for the nameServers section in the output. It will list 4 servers (e.g., ns-cloud-e1.googledomains.com.).
+
+Step 3: Update Your Domain Registrar
+Go to your domain registrar's website (GoDaddy, Namecheap, etc.) and find the DNS / Name Server settings. Replace the existing name servers with the 4 servers you got from the previous step. This change can take several hours to propagate across the internet.
+
+Step 4: Create an 'A' Record in Cloud DNS
+This record will point your domain to the load balancer's IP address. First, get the IP again if you don't have it:
+
+Bash
+
+LB_IP=$(gcloud compute addresses describe lb-ipv4 --global --format="get(address)")
+Now create the DNS record. We'll point www.[YOUR_DOMAIN_NAME] to it.
+
+Bash
+
+gcloud dns record-sets transaction start --zone=my-lab-zone
+
+gcloud dns record-sets transaction add $LB_IP \
+  --name="www.[YOUR_DOMAIN_NAME]." \
+  --ttl=300 \
+  --type=A \
+  --zone=my-lab-zone
+
+gcloud dns record-sets transaction execute --zone=my-lab-zone
+Replace [YOUR_DOMAIN_NAME] with your domain.
+
+Step 5: Test
+Once DNS propagation is complete, you can navigate to http://www.[YOUR_DOMAIN_NAME] in your browser, and you should see your webpage.
