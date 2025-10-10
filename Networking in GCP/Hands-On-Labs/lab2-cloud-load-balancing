@@ -1,0 +1,84 @@
+Lab 2: Cloud Load Balancing
+Objective: Deploy a group of web server VMs and distribute traffic to them using an External HTTP(S) Load Balancer for high availability.
+
+Step 1: Create an Instance Template
+An instance template is a reusable blueprint for creating VMs. We'll include a startup script to install an Apache web server.
+
+Bash
+
+gcloud compute instance-templates create web-server-template \
+    --machine-type=e2-micro \
+    --network=my-custom-vpc \
+    --subnet=web-subnet \
+    --tags=web-server \
+    --metadata=startup-script='#! /bin/bash
+      sudo apt-get update
+      sudo apt-get install -y apache2
+      sudo service apache2 restart
+      echo "<!doctype html><html><body><h1>Welcome to Lab 2!</h1></body></html>" | sudo tee /var/www/html/index.html'
+This template uses our custom VPC and subnet and applies the web-server tag so our firewall rule works.
+
+Step 2: Create a Managed Instance Group (MIG)
+A MIG uses the template to create and manage a group of identical VMs. It can auto-scale and auto-heal.
+
+Bash
+
+gcloud compute instance-groups managed create web-server-group \
+    --base-instance-name=web-server \
+    --size=2 \
+    --template=web-server-template
+This creates a group of 2 VMs based on our template.
+
+Step 3: Create the Load Balancer Components
+An HTTP(S) load balancer has several parts:
+
+A. Health Check: To check if the VMs are serving traffic correctly.
+
+Bash
+
+gcloud compute health-checks create http http-basic-check --port 80
+B. Backend Service: A logical grouping of our instances (the MIG).
+
+Bash
+
+gcloud compute backend-services create web-backend-service \
+    --protocol=HTTP \
+    --health-checks=http-basic-check \
+    --global
+C. Add the MIG to the Backend Service:
+
+Bash
+
+gcloud compute backend-services add-backend web-backend-service \
+    --instance-group=web-server-group \
+    --instance-group-zone=us-central1-a \
+    --global
+D. URL Map: To route incoming requests to the backend service.
+
+Bash
+
+gcloud compute url-maps create web-map \
+    --default-service web-backend-service
+E. Target HTTP Proxy: To receive requests and route them using the URL map.
+
+Bash
+
+gcloud compute target-http-proxies create http-lb-proxy \
+    --url-map=web-map
+F. Forwarding Rule: This creates the public IP address and ties everything together.
+
+Bash
+
+gcloud compute forwarding-rules create http-forwarding-rule \
+    --address-name=lb-ipv4 \
+    --global \
+    --target-http-proxy=http-lb-proxy \
+    --ports=80
+Step 4: Get the Load Balancer's IP and Test
+It can take a few minutes for the load balancer to provision.
+
+Bash
+
+gcloud compute addresses describe lb-ipv4 --global --format="get(address)"
+Copy the IP address returned by this command and paste it into your web browser. You should see the "Welcome to Lab 2!" message.
+
