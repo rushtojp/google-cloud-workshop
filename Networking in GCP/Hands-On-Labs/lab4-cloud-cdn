@@ -1,0 +1,29 @@
+Lab 4: Cloud CDN
+Objective: Improve application performance by enabling Cloud CDN to cache your website's content at Google's edge locations.
+
+Step 1: Enable Cloud CDN on the Backend Service
+This is the easiest step! You simply update the backend service you created in Lab 2.
+
+Bash
+
+gcloud compute backend-services update web-backend-service \
+    --enable-cdn \
+    --global
+Step 2: Verify CDN is Working
+Verification involves checking the response headers.
+
+Open a new terminal and use curl to see the headers. The first request will likely be a CACHE_MISS.
+
+Bash
+
+curl -I http://[LB_IP_ADDRESS]
+(Replace [LB_IP_ADDRESS] with your load balancer's IP).
+
+Look at the output. You should see standard HTTP headers.
+
+Wait about 30-60 seconds and run the command again.
+
+Bash
+
+curl -I http://[LB_IP_ADDRESS]
+This time, you should see an Age: header in the response. The presence of the Age header confirms that the response was served from a Google Front End cache (the CDN).
