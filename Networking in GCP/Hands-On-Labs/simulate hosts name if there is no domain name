@@ -1,0 +1,55 @@
+Option 1: Simulate DNS with Your Local hosts File (Recommended)
+This is the best option because it perfectly simulates how DNS works, but only on your local computer. You will "trick" your own machine into thinking a fake domain name points to your load balancer's IP address.
+
+Concept: Before your computer asks a public DNS server for an IP address, it first checks a local file called hosts. We can add our own entry there.
+
+Here are the steps:
+
+Step 1: Get Your Load Balancer's IP Address
+If you don't have it handy, run this command again in Cloud Shell or your terminal:
+
+Bash
+
+gcloud compute addresses describe lb-ipv4 --global --format="get(address)"
+Copy the IP address it returns (e.g., 34.123.45.67).
+
+Step 2: Choose a Fake Domain Name
+You can invent any name you like. For this lab, let's use www.my-gcp-lab.local.
+
+Step 3: Edit Your hosts File
+You will need administrator or root privileges to edit this file.
+
+On macOS or Linux:
+
+Open the Terminal.
+
+Type the following command to open the hosts file in a text editor:
+
+Bash
+
+sudo nano /etc/hosts
+Enter your computer's password when prompted.
+
+On Windows:
+
+Press the Windows key, type Notepad, right-click on the Notepad icon, and select "Run as administrator".
+
+In Notepad, go to File > Open.
+
+In the file name box, navigate to C:\Windows\System32\drivers\etc\.
+
+Change the file type dropdown from "Text Documents (*.txt)" to "All Files".
+
+You should now see the hosts file. Open it.
+
+Step 4: Add the New Entry
+Go to the bottom of the file and add a new line in the following format:
+[LOAD_BALANCER_IP] [YOUR_FAKE_DOMAIN]
+
+Using our examples, it would look like this:
+
+34.123.45.67  www.my-gcp-lab.local
+Step 5: Save and Test
+Save the hosts file and close the editor. Now, open your web browser and navigate to http://www.my-gcp-lab.local.
+
+Result: Your browser will now direct that request to your GCP load balancer's IP, and you will see your "Welcome to Lab 2!" page. You have successfully simulated the result of the Cloud DNS lab. You can now proceed to Lab 4 (Cloud CDN).
