@@ -1,3 +1,7 @@
 Networking documentation
 
 https://cloud.google.com/docs/networking
+
+Cloud NAT Example
+
+https://github.com/priyankavergadia/GCPSketchnote/blob/main/images/CloudNAT.jpg
