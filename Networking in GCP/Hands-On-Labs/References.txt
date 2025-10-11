@@ -2,6 +2,10 @@ Networking documentation
 
 https://cloud.google.com/docs/networking
 
+Networking - Cloud architecture center
+
+https://cloud.google.com/architecture/blueprints/security-foundations/networking
+
 Cloud NAT Example
 
 https://github.com/priyankavergadia/GCPSketchnote/blob/main/images/CloudNAT.jpg
