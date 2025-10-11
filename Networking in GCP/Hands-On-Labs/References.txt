@@ -13,3 +13,7 @@ https://cloud.google.com/architecture/landing-zones/decide-network-design#choose
 Cloud NAT Example
 
 https://github.com/priyankavergadia/GCPSketchnote/blob/main/images/CloudNAT.jpg
+
+https://cloud.google.com/vpc/docs/overview
+
+
