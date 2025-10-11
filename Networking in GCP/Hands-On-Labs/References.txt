@@ -6,6 +6,10 @@ Networking - Cloud architecture center
 
 https://cloud.google.com/architecture/blueprints/security-foundations/networking
 
+Choose your network design
+
+https://cloud.google.com/architecture/landing-zones/decide-network-design#choose_your_network_design
+
 Cloud NAT Example
 
 https://github.com/priyankavergadia/GCPSketchnote/blob/main/images/CloudNAT.jpg
