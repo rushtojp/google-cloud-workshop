@@ -1,0 +1,76 @@
+Prerequisites:
+
+A Google Cloud Platform Account with billing enabled.
+
+The gcloud command-line tool installed and configured (gcloud init).
+
+A GCP Project created and selected.
+
+APIs for Compute Engine, Kubernetes Engine, App Engine, and Cloud Functions enabled in your project. You can do this via the console or gcloud services enable [SERVICE_NAME].
+
+Lab 1: Deploying a Web Server on Compute Engine (IaaS)
+Objective: To create a GCE virtual machine, install a web server, and make it accessible from the internet.
+
+Step-by-Step Procedure:
+
+Create the VM Instance:
+
+Open the Cloud Shell in the GCP Console.
+
+Run the following command to create a small Debian VM. We are also adding a http-server tag which we will use for a firewall rule.
+
+Bash
+
+gcloud compute instances create my-web-server \
+    --project=$(gcloud config get-value project) \
+    --zone=us-central1-c \
+    --machine-type=e2-micro \
+    --image-family=debian-11 \
+    --image-project=debian-cloud \
+    --tags=http-server
+Create a Firewall Rule:
+
+By default, all incoming traffic is blocked. Create a rule to allow HTTP traffic (port 80) to any instance with the http-server tag.
+
+Bash
+
+gcloud compute firewall-rules create allow-http \
+    --allow tcp:80 \
+    --source-ranges=0.0.0.0/0 \
+    --target-tags=http-server
+Install a Web Server (Nginx):
+
+SSH into your newly created instance:
+
+Bash
+
+gcloud compute ssh my-web-server --zone=us-central1-c
+Once inside the VM's terminal, update the package list and install Nginx:
+
+Bash
+
+sudo apt-get update
+sudo apt-get install -y nginx
+Check if Nginx is running:
+
+Bash
+
+systemctl status nginx
+(Press q to exit the status view).
+
+Verify:
+
+Go back to the GCP Console -> Compute Engine -> VM Instances.
+
+Find your my-web-server instance and copy its External IP address.
+
+Paste this IP address into a new browser tab. You should see the "Welcome to nginx!" page.
+
+Cleanup:
+
+To avoid ongoing charges, delete the VM and the firewall rule.
+
+Bash
+
+gcloud compute instances delete my-web-server --zone=us-central1-c --quiet
+gcloud compute firewall-rules delete allow-http --quiet
