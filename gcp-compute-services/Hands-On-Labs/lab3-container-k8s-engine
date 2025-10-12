@@ -1,0 +1,52 @@
+Lab 3: Deploying a Container on Kubernetes Engine (CaaS)
+Objective: To create a GKE Autopilot cluster and deploy a simple containerized web application.
+
+Step-by-Step Procedure:
+
+Create a GKE Autopilot Cluster:
+
+This command creates a managed Kubernetes cluster. Autopilot simplifies this by managing the nodes for you. This step can take 5-10 minutes.
+
+Bash
+
+gcloud container clusters create-auto my-gke-cluster \
+    --region=us-central1
+Get Cluster Credentials:
+
+Configure kubectl (the Kubernetes command-line tool) to connect to your new cluster.
+
+Bash
+
+gcloud container clusters get-credentials my-gke-cluster --region=us-central1
+Deploy an Application:
+
+We will use a pre-built sample container image from Google. This command creates a Deployment, which manages the pods running our container.
+
+Bash
+
+kubectl create deployment hello-server --image=gcr.io/google-samples/hello-app:1.0
+Expose the Application to the Internet:
+
+Create a Kubernetes Service of type LoadBalancer. This will provision a network load balancer with a public IP address to route traffic to your application.
+
+Bash
+
+kubectl expose deployment hello-server --type=LoadBalancer --port 80 --target-port 8080
+Verify:
+
+It may take a minute or two for the external IP to be provisioned. Check the status:
+
+Bash
+
+kubectl get service hello-server
+Wait until the EXTERNAL-IP field is populated.
+
+Copy the external IP address and paste it into your browser. You should see "Hello, world!" and some version/hostname details.
+
+Cleanup:
+
+Deleting the cluster is the most important step to avoid costs. This command deletes the cluster and all its resources (including the service and deployment).
+
+Bash
+
+gcloud container clusters delete my-gke-cluster --region=us-central1 --quiet
