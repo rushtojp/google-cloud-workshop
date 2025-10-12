@@ -1,0 +1,171 @@
+Week 28: GCP Compute Services
+Objective: This week, we will explore the core compute services offered by Google Cloud Platform. We will understand the spectrum of compute options, from full-control Infrastructure-as-a-Service (IaaS) to fully-managed serverless platforms, enabling you to choose the right service for your application needs.
+
+Part 1: Lecture Notes
+1. Introduction: The Spectrum of Compute
+In cloud computing, "compute" refers to the processing power and memory required to run your applications. GCP offers a range of services that provide different levels of management, control, and abstraction. Think of it as a spectrum:
+
+Infrastructure as a Service (IaaS): Maximum control. You manage the virtual machines, OS, and software. GCP manages the physical hardware and networking.
+
+Example: Google Compute Engine (GCE)
+
+Containers as a Service (CaaS): Manages the environment for running containers. You package your application and its dependencies into a container; the service handles orchestration.
+
+Example: Google Kubernetes Engine (GKE)
+
+Platform as a Service (PaaS): High-level abstraction. You only manage your application code. GCP manages the underlying infrastructure, scaling, and runtime.
+
+Example: App Engine
+
+Functions as a Service (FaaS): The highest level of abstraction. You write small, single-purpose functions that respond to events. GCP manages everything else.
+
+Example: Cloud Functions
+
+Service	Type	You Manage	Use Case
+Compute Engine	IaaS	OS, Middleware, App Code	Lift & shift, custom OS, full control
+Kubernetes Engine	CaaS	App Code in Containers	Microservices, containerized apps
+App Engine	PaaS	App Code	Web apps, mobile backends, rapid dev
+Cloud Functions	FaaS	Function Code	Event-driven tasks, lightweight APIs
+
+Export to Sheets
+2. Google Compute Engine (GCE)
+GCE is GCP's IaaS offering, allowing you to create and run Virtual Machines (VMs) on Google's infrastructure.
+
+What is it? Provides virtual servers, called "instances," that you can customize and control completely.
+
+Key Concepts:
+
+VM Instances: The fundamental unit. You choose machine type (CPU, RAM), OS (Linux/Windows), and storage.
+
+Machine Types: Predefined (e.g., e2-micro, n2-standard-4) or custom machine types where you specify the exact vCPU and memory.
+
+Persistent Disks: Durable network block storage for your instances, similar to a physical hard drive. They can be SSDs or standard HDDs.
+
+Images: Pre-configured operating systems and software used to create new instances (e.g., Debian 11, Windows Server 2022).
+
+Instance Groups: A collection of VM instances that you can manage as a single entity.
+
+Managed Instance Groups (MIGs): Offer autoscaling, auto-healing, and rolling updates. Ideal for scalable and highly available applications.
+
+Unmanaged Instance Groups: Simply a group of heterogeneous VMs that you manage yourself.
+
+Role & Use Cases:
+
+Migrating existing applications from on-premises servers ("lift and shift").
+
+Applications requiring a specific OS or custom software configurations.
+
+High-performance computing or batch processing jobs.
+
+When you need full administrative control over the environment.
+
+3. Google Kubernetes Engine (GKE)
+GKE is a managed environment for deploying, managing, and scaling containerized applications using Google infrastructure.
+
+Refresher on Containers & Kubernetes:
+
+Containers (e.g., Docker): Package an application with all its dependencies (libraries, code, runtime) into a single, portable unit.
+
+Kubernetes: An open-source container orchestration platform that automates the deployment, scaling, and management of containerized applications.
+
+What is GKE? GKE provides a managed Kubernetes control plane. Google handles the health, upgrades, and availability of the cluster's master components, while you manage the worker nodes and the applications running on them.
+
+Key Concepts:
+
+Cluster: A set of worker machines, called nodes, that run containerized applications. Every cluster has at least one worker node.
+
+Node: A VM instance (from GCE) that runs the Kubernetes processes necessary to be part of the cluster.
+
+Pod: The smallest deployable unit in Kubernetes; a group of one or more containers.
+
+Deployment: A Kubernetes object that manages a set of replica Pods, handling updates and rollbacks.
+
+Service: An abstraction that defines a logical set of Pods and a policy by which to access them (e.g., via a single IP address and load balancer).
+
+GKE Modes:
+
+Standard: You manage the underlying node infrastructure (VMs). More control, more responsibility.
+
+Autopilot: GKE provisions and manages the cluster’s entire underlying infrastructure, including nodes and node pools. You only pay for the resources your pods use. Ideal for new users.
+
+Role & Use Cases:
+
+Deploying microservices-based architectures.
+
+Achieving high availability and robust scaling for applications.
+
+Creating portable applications that can run on any Kubernetes environment (on-prem, other clouds).
+
+4. App Engine (GAE)
+App Engine is a fully managed, serverless platform for developing and hosting web applications at scale.
+
+What is it? A PaaS offering where you simply upload your code, and Google handles the provisioning of servers, scaling, and infrastructure management.
+
+Key Environments:
+
+App Engine Standard Environment:
+
+Runs applications in a language-specific sandbox.
+
+Supports specific versions of Python, Java, Node.js, Go, PHP, Ruby.
+
+Key Feature: Scales down to zero instances when there's no traffic, making it extremely cost-effective for applications with variable workloads.
+
+Very fast scaling times.
+
+App Engine Flexible Environment:
+
+Runs your application in Docker containers on GCE VMs.
+
+Supports any programming language by allowing you to supply a custom Dockerfile.
+
+Does not scale to zero (minimum 1 instance).
+
+Offers more flexibility: allows SSH access, background processes, and writing to local disk.
+
+Key Concepts:
+
+Services (formerly Modules): Decompose a large application into logical components. Each service can have its own version and scaling settings.
+
+Versions: You can deploy multiple versions of your application and split traffic between them for A/B testing or gradual rollouts.
+
+app.yaml: The main configuration file that tells App Engine how to run your application (runtime, scaling settings, environment variables).
+
+Role & Use Cases:
+
+Web applications and websites.
+
+Mobile application backends.
+
+Rapid application development where infrastructure management is not a concern.
+
+5. Cloud Functions (GCF)
+Cloud Functions is a lightweight, event-driven, serverless compute platform.
+
+What is it? Allows you to run small snippets of code (functions) in response to events, without provisioning or managing any servers.
+
+Key Concepts:
+
+Function: A single-purpose piece of code written in Node.js, Python, Go, Java, etc.
+
+Trigger: The event that causes the function to execute.
+
+Types of Triggers:
+
+HTTP: The function runs when it receives an HTTP request (creates a web API endpoint).
+
+Cloud Pub/Sub: Runs in response to a message on a Pub/Sub topic.
+
+Cloud Storage: Runs when a file is created, deleted, or modified in a bucket.
+
+Firestore/Firebase: Runs in response to database changes.
+
+Role & Use Cases:
+
+Creating webhooks or lightweight APIs.
+
+Real-time data processing (e.g., creating a thumbnail image whenever a new image is uploaded to a storage bucket).
+
+Automating cloud infrastructure tasks (e.g., sending a notification when a VM is created).
+
+Integrating different cloud services together.
