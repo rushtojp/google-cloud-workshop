@@ -1,0 +1,89 @@
+Lab 2: Deploying a Python Web App on App Engine (PaaS)
+Objective: To deploy a simple Python Flask application to the App Engine Standard environment.
+
+Step-by-Step Procedure:
+
+Create Application Files:
+
+In your Cloud Shell or local terminal, create a new directory for your project.
+
+Bash
+
+mkdir my-app-engine-app
+cd my-app-engine-app
+Create a Python file named main.py:
+
+Bash
+
+nano main.py
+Paste the following code into the file:
+
+Python
+
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    """Return a friendly HTTP greeting."""
+    return 'Hello from App Engine!'
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=8080, debug=True)
+(Save and exit: Ctrl+X, Y, Enter).
+
+Create a dependencies file requirements.txt:
+
+Bash
+
+nano requirements.txt
+Add the following line:
+
+Flask==2.2.2
+(Save and exit).
+
+Create the App Engine configuration file app.yaml:
+
+Bash
+
+nano app.yaml
+Add the following configuration:
+
+YAML
+
+runtime: python39 # Or your preferred python version
+(Save and exit).
+
+Deploy the Application:
+
+First, you need to create an App Engine application in a specific region. This is a one-time setup per project.
+
+Bash
+
+gcloud app create --region=us-central
+Now, deploy your code:
+
+Bash
+
+gcloud app deploy
+Confirm the deployment by typing Y when prompted.
+
+Verify:
+
+After the deployment finishes, it will provide a target URL. You can also run the following command to open your app in the browser:
+
+Bash
+
+gcloud app browse
+You should see the message "Hello from App Engine!"
+
+Cleanup:
+
+You can disable the application to stop it from serving traffic and incurring costs.
+
+Bash
+
+gcloud app services delete default --quiet
+Note: Deleting an App Engine app is a more permanent action and can be done from the GCP Console under App Engine -> Settings.
+
