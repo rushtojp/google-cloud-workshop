@@ -1,0 +1,210 @@
+Hands-On Lab: Your First Google Cloud Function - The Automated Image Processor
+Lab Overview
+
+In this lab, you will build and deploy a serverless, event-driven function on Google Cloud. The function will automatically trigger whenever a new image is uploaded to a Cloud Storage bucket. It will then read the metadata of that image and log it. This simple, powerful pattern is the foundation for many real-world applications like creating image thumbnails, analyzing data, or notifying other systems.
+
+1. Learning Objectives
+
+Upon completion of this lab, you will be able to:
+
+Describe the core concepts of serverless computing and event-driven architectures.
+
+Enable the necessary Google Cloud APIs for your project.
+
+Create a Cloud Storage bucket to act as an event source.
+
+Write and configure a simple Cloud Function using the Python runtime.
+
+Deploy a Cloud Function that is triggered by a Cloud Storage event.
+
+Test the function by uploading a file and verify its execution by inspecting logs.
+
+2. Scenario
+
+Imagine you are building a web application where users can upload profile pictures. Instead of having your main application server handle image processing (which can be slow and resource-intensive), you want to offload this task. You will create a system where, upon image upload, a separate, serverless function is automatically triggered to log the image's details for later processing.
+
+3. Prerequisites
+
+Google Cloud Platform (GCP) Account: You must have a GCP account with billing enabled. New users can take advantage of the Google Cloud Free Tier.
+
+Project: A Google Cloud project selected for this lab.
+
+Permissions: You need the Editor or Owner role in your project to enable APIs and create resources.
+
+Basic Python knowledge: The code is simple, but familiarity with Python will be helpful.
+
+4. Lab Steps
+
+Part 1: Setting Up Your Environment
+First, we need to prepare the cloud environment by enabling the necessary services and creating a place to store our images.
+
+1. Enable Required APIs:
+Every Google Cloud service needs its API enabled before use. We'll need Cloud Functions, Cloud Build (which builds your function code into a container), and Cloud Logging.
+
+Go to the Google Cloud Console.
+
+In the search bar at the top, search for "Cloud Functions API" and click "Enable".
+
+Repeat this process for "Cloud Build API" and "Cloud Logging API". If they are already enabled, you're all set.
+
+2. Create a Cloud Storage Bucket:
+This bucket will be the "trigger" for our function. When a file lands here, our function will run.
+
+In the Cloud Console, navigate to the Navigation menu (☰) > Cloud Storage > Buckets.
+
+Click + CREATE.
+
+Name your bucket: Give it a globally unique name. A good practice is to append your project ID, e.g., image-uploads-your-project-id.
+
+Choose where to store your data: Select a Region (e.g., us-central1).
+
+Leave the other settings as their default values for this lab.
+
+Click CREATE.
+
+Part 2: Creating the Cloud Function
+Now, let's create the function itself. We'll use the Cloud Console's inline editor for simplicity.
+
+1. Navigate to Cloud Functions:
+
+In the Navigation menu (☰), go to Cloud Functions.
+
+2. Configure the Function:
+
+Click + CREATE FUNCTION.
+
+Environment: Select 2nd gen. (This is the latest and recommended generation).
+
+Function name: Enter log-image-metadata.
+
+Region: Select the same region you used for your Cloud Storage bucket (e.g., us-central1).
+
+Under Trigger, select:
+
+Trigger type: Cloud Storage
+
+Event type: google.cloud.storage.object.v1.finalized (This means "when a new object is created").
+
+Bucket: Click BROWSE and select the bucket you created in Part 1.
+
+Scroll down and expand Runtime, build and connections settings.
+
+Under the Runtime tab, ensure Runtime service account is set to Compute Engine default service account.
+
+Click NEXT.
+
+Part 3: Writing and Deploying the Code
+This is where you'll provide the logic for your function.
+
+1. Configure the Code:
+
+Runtime: Select Python 3.11 (or a recent Python version).
+
+Source code: Keep Inline Editor selected.
+
+Entry point: Set this to process_image_upload. This is the name of the Python function that will be executed.
+
+2. Write the Python Code:
+Replace the default code in the main.py file with the following:
+
+Python
+
+import functions_framework
+
+# Register a CloudEvent function with the Functions Framework
+@functions_framework.cloud_event
+def process_image_upload(cloudevent):
+    """
+    This function is triggered when a file is uploaded to a Cloud Storage bucket.
+    """
+    # The CloudEvent data payload contains the metadata of the storage object.
+    payload = cloudevent.data.get("protoPayload", {})
+    resource_name = payload.get("resourceName", "N/A")
+
+    # Extract bucket and file name from the resourceName
+    # Format: projects/_/buckets/your-bucket-name/objects/your-file-name.jpg#166558...
+    try:
+        parts = resource_name.split('/')
+        bucket_name = parts[3]
+        file_name = parts[5].split('#')[0]
+
+        print(f"🎉 Function triggered successfully!")
+        print(f"  - Bucket: {bucket_name}")
+        print(f"  - File: {file_name}")
+        print(f"  - Event Type: {cloudevent.get('type')}")
+
+    except IndexError:
+        print(f"Error processing resource name: {resource_name}")
+3. Update Dependencies:
+In the requirements.txt file, ensure you have the following line. This package helps handle the event data.
+
+functions-framework
+4. Deploy:
+
+Click the DEPLOY button at the bottom of the page.
+
+Deployment will take a few minutes. You can monitor the progress by watching the spinner icon next to your function's name. Once it turns into a green checkmark, the function is ready.
+
+Part 4: Testing and Verification
+Let's trigger the function and see if it works.
+
+1. Upload a File:
+
+Navigate back to your Cloud Storage bucket (Navigation menu > Cloud Storage > Buckets).
+
+Click on your bucket's name.
+
+Click UPLOAD FILES and select any small image file from your computer.
+
+2. Check the Logs:
+
+Navigate back to Cloud Functions (Navigation menu > Cloud Functions).
+
+Click on your function name, log-image-metadata.
+
+Go to the LOGS tab.
+
+You may need to wait a minute and click "Refresh". You should see log entries from your function's execution!
+
+Expected Log Output:
+You should see output that looks similar to this, confirming your function ran successfully:
+
+Plaintext
+
+🎉 Function triggered successfully!
+  - Bucket: image-uploads-your-project-id
+  - File: your-image-name.jpg
+  - Event Type: google.cloud.storage.object.v1.finalized
+5. Cleanup
+
+To avoid incurring charges, it's important to delete the resources you created.
+
+Delete the Cloud Function:
+
+Go to the Cloud Functions dashboard.
+
+Click the three-dot menu next to your function and select Delete.
+
+Delete the Cloud Storage Bucket:
+
+Go to the Cloud Storage Buckets page.
+
+Select the checkbox next to your bucket and click DELETE. You will need to type the bucket name to confirm.
+
+(Optional) Shut Down the Project:
+
+If you created a new project just for this lab, you can shut it down by going to IAM & Admin > Settings.
+
+6. Discussion and Further Exploration
+
+Congratulations! You have successfully built a serverless, event-driven pipeline.
+
+What did you achieve? You decoupled the action (uploading a file) from the reaction (processing the file). Your application can now upload files quickly without waiting for processing. The log-image-metadata function will scale automatically to handle one upload or one million uploads without any server management from you.
+
+Next Steps (Challenge Yourself):
+
+Easy: Modify the function to only process files that are in a specific folder within the bucket (e.g., /uploads/). Hint: Check the file_name variable.
+
+Medium: Use the Pillow library to generate a thumbnail of the uploaded image and save it to a different Cloud Storage bucket. Hint: You would need to add Pillow to requirements.txt and add code to download the original file, resize it, and upload the new version.
+
+Hard: Integrate with the Cloud Vision AI to analyze the uploaded image for labels (e.g., "cat", "boat", "sunset") and print those labels to the logs. Hint: You would need to enable the Vision AI API and use its client library.
