@@ -1,0 +1,224 @@
+Hands-On Lab: Exploring GCP's Serverless Application Services
+Objective: This lab provides a hands-on introduction to three of Google Cloud's key serverless application hosting services: App Engine, Cloud Run, and Cloud Functions. By deploying the same simple application to both App Engine and Cloud Run, and then creating a separate event-driven function, you will gain a practical understanding of their differences and ideal use cases.
+
+Time to complete: Approximately 60-90 minutes.
+
+1. Prerequisites
+Before you begin, ensure you have the following:
+
+A Google Cloud Platform (GCP) Account: You will need a GCP account with billing enabled. New users can take advantage of the free tier.
+
+Google Cloud SDK: Make sure you have the gcloud command-line tool installed and initialized. You can find installation instructions here.
+
+A Text Editor: Any text editor or IDE (like VS Code, Sublime Text, or Atom) will work.
+
+Basic Command-Line Knowledge: Familiarity with basic terminal commands will be helpful.
+
+2. Lab 1: Deploying a Simple Web Application with App Engine
+In this lab, you'll deploy a basic Python web application using App Engine's standard environment.
+
+2.1 Create the Application Files
+Create a new directory for your project:
+
+mkdir gcp-app-services-lab
+cd gcp-app-services-lab
+
+Inside this directory, create a file named main.py with the following content:
+
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    """Return a friendly HTTP greeting."""
+    return 'Hello from App Engine!'
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=8080, debug=True)
+
+Create a requirements.txt file in the same directory to specify the application's dependencies:
+
+Flask==2.2.2
+
+Finally, create an app.yaml file. This is the configuration file for App Engine:
+
+runtime: python39
+
+2.2 Deploy to App Engine
+Open your terminal and make sure you are in the gcp-app-services-lab directory.
+
+If this is your first time using App Engine, you'll need to create an App Engine application in your project. Follow the prompts after running this command:
+
+gcloud app create
+
+Deploy your application:
+
+gcloud app deploy
+
+When prompted, enter 'Y' to continue.
+
+Once the deployment is complete, view your application by running:
+
+gcloud app browse
+
+This will open a new tab in your web browser, and you should see the message "Hello from App Engine!"
+
+3. Lab 2: Deploying the Same Application as a Container with Cloud Run
+Now, let's deploy the same application using Cloud Run. This requires containerizing the application with Docker.
+
+3.1 Create a Dockerfile
+In the same gcp-app-services-lab directory, create a file named Dockerfile with the following content:
+
+# Use the official Python image.
+FROM python:3.9-slim
+
+# Set the working directory.
+WORKDIR /app
+
+# Copy the requirements file and install dependencies.
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copy the rest of the application code.
+COPY . .
+
+# Run the web server.
+CMD ["gunicorn", "--bind", "0.0.0.0:8080", "main:app"]
+
+3.2 Add gunicorn to requirements.txt
+Cloud Run requires a production-ready web server. Add gunicorn to your requirements.txt file:
+
+Flask==2.2.2
+gunicorn==20.1.0
+
+3.3 Build and Deploy to Cloud Run
+Enable the required APIs:
+
+gcloud services enable run.googleapis.com artifactregistry.googleapis.com
+
+Build the container image using Cloud Build and store it in Artifact Registry. Replace [PROJECT-ID] with your GCP Project ID.
+
+gcloud builds submit --tag gcr.io/[PROJECT-ID]/hello-app-run
+
+Deploy the container to Cloud Run:
+
+gcloud run deploy hello-app-run \
+    --image gcr.io/[PROJECT-ID]/hello-app-run \
+    --platform managed \
+    --region us-central1 \
+    --allow-unauthenticated
+
+When prompted, confirm the service name and allow unauthenticated invocations.
+
+After the deployment, the command line will output a URL for your service. Open this URL in your browser, and you will see "Hello from App Engine!" (even though it's running on Cloud Run, as we haven't changed the code).
+
+4. Lab 3: Creating an Event-Driven Function with Cloud Functions
+In this lab, you'll create a Cloud Function that is triggered whenever a file is uploaded to a Cloud Storage bucket.
+
+4.1 Create a Cloud Storage Bucket
+Create a Cloud Storage bucket. Bucket names must be globally unique.
+
+gsutil mb gs://[UNIQUE-BUCKET-NAME]
+
+Replace [UNIQUE-BUCKET-NAME] with a unique name for your bucket.
+
+4.2 Create the Cloud Function
+In your gcp-app-services-lab directory, create a new main.py file (you can rename the old one or create a new directory for this lab) with the following content:
+
+def hello_gcs(event, context):
+    """Triggered by a change to a Cloud Storage bucket.
+    Args:
+         event (dict): Event payload.
+         context (google.cloud.functions.Context): Metadata for the event.
+    """
+    file = event
+    print(f"Processing file: {file['name']}.")
+
+There are no external dependencies for this function.
+
+4.3 Deploy the Cloud Function
+Deploy the function, connecting it to your Cloud Storage bucket as the trigger. Replace [UNIQUE-BUCKET-NAME] with the name of the bucket you created.
+
+gcloud functions deploy hello_gcs \
+    --runtime python39 \
+    --trigger-resource [UNIQUE-BUCKET-NAME] \
+    --trigger-event google.storage.object.finalize
+
+4.4 Test the Function
+Upload a file to your Cloud Storage bucket. You can create a simple text file on your local machine named test.txt.
+
+echo "Hello, GCS!" > test.txt
+gsutil cp test.txt gs://[UNIQUE-BUCKET-NAME]/
+
+View the logs for your function to see the output:
+
+gcloud functions logs read hello_gcs --limit 50
+
+You should see a log entry that says "Processing file: test.txt."
+
+5. Comparison and "Which to Choose" Summary
+Feature
+
+App Engine
+
+Cloud Run
+
+Cloud Functions
+
+Unit of Deployment
+
+Application (source code)
+
+Container Image
+
+Function (source code)
+
+Runtime
+
+Pre-configured runtimes (Python, Java, etc.)
+
+Any language/runtime via Docker container
+
+Pre-configured runtimes (Python, Node.js, etc.)
+
+Scaling
+
+Scales to zero
+
+Scales to zero
+
+Scales to zero
+
+Use Case
+
+Web applications, APIs, microservices
+
+Containerized applications, microservices
+
+Event-driven, single-purpose functions
+
+Complexity
+
+Low - abstracts away infrastructure
+
+Medium - requires containerization
+
+Very Low - focus purely on the function
+
+When to use which service:
+App Engine: Ideal for straightforward web applications and APIs where you want a simple deployment process and don't want to manage containers.
+
+Cloud Run: The most flexible option. Use it when you have containerized applications, need custom runtimes, or want to deploy microservices.
+
+Cloud Functions: Best for small, event-driven tasks that respond to events from other cloud services (like file uploads, database changes, or messages on a Pub/Sub topic).
+
+6. Conclusion
+Congratulations! You have successfully deployed applications to App Engine and Cloud Run, and created an event-driven function with Cloud Functions. You now have a foundational understanding of these powerful serverless services on Google Cloud and are better equipped to choose the right tool for your serverless computing needs.
+
+To avoid ongoing charges, you can delete the resources you created during this lab:
+
+gcloud app services delete default
+gcloud run services delete hello-app-run
+gcloud functions delete hello_gcs
+gsutil rm -r gs://[UNIQUE-BUCKET-NAME]
