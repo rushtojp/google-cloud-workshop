@@ -1,0 +1,100 @@
+1. Cloud Storage
+Class Notes: Concepts
+What is it? Cloud Storage is Google's object storage service. It's infinitely scalable, highly durable, and cost-effective.
+
+Key Concept: Objects vs. Filesystems:
+
+You store "objects" (files) in "buckets."
+
+It is not a file system. You can't "mount" a bucket like a network drive (for that, you use Cloud Filestore).
+
+Think of it as a massive, infinitely scalable key-value store where the key is the object name (e.g., images/puppy.jpg) and the value is the data.
+
+Key Components:
+
+Buckets: The top-level containers that hold your objects. Bucket names must be globally unique.
+
+Objects: The individual files (images, videos, backups, logs) you store.
+
+Storage Classes: These control cost and availability.
+
+Standard: For "hot" data accessed frequently (e.g., website assets).
+
+Nearline: For data accessed less than once a month (e.g., backups).
+
+Coldline: For data accessed less than once a quarter (e.g., archives).
+
+Archive: For long-term archival/disaster recovery, accessed less than once a year.
+
+Object Lifecycle Management: This is a crucial feature. It's a set of rules you apply to a bucket to automate data management and save costs.
+
+Example Rule 1: "If an object is older than 30 days, move it from Standard to Nearline."
+
+Example Rule 2: "If an object in the 'Archive' class is older than 7 years, delete it."
+
+Common Use Cases:
+
+Serving static website content (images, CSS, JS).
+
+Storing backups and archives.
+
+The "landing zone" for data in a data lake (e.g., raw logs, batch data).
+
+Lab 1: The Versatile Bucket
+Goal: Create a bucket, upload a file, make it public, and set a lifecycle rule.
+
+Navigate to Cloud Storage: In the GCP Console, go to Cloud Storage > Buckets.
+
+Create a Bucket:
+
+Click "Create".
+
+Name: Give it a globally unique name (e.g., [YOUR_PROJECT_ID]-masterclass-bucket).
+
+Location: Choose Region and select a region near you (e.g., us-central1).
+
+Storage Class: Choose Standard for the default.
+
+Access Control: Select Uniform.
+
+Click "Create".
+
+Upload an Object:
+
+Click on your new bucket's name.
+
+Click "Upload files" and pick any small image or text file from your computer (e.g., test.txt).
+
+Make the Object Public (for a static website):
+
+Find your uploaded file in the list and click the three dots (...) at the end of its row.
+
+Select "Edit access".
+
+Click "Add Entry".
+
+Entity: Select Public.
+
+Name: Enter allUsers.
+
+Role: Select Storage Object Viewer.
+
+Click "Save". Your file now has a public URL. Click the file name and find the "Public URL" to test it in your browser.
+
+Set a Lifecycle Rule:
+
+Click on your bucket's name to go to its details page.
+
+Click the "Lifecycle" tab.
+
+Click "Add a rule".
+
+Action: Select Set storage class to Coldline.
+
+Object condition: Select Age and enter 30 days.
+
+Click "Continue", then "Create".
+
+Congratulations! You've just automated your storage costs.
+
+Cleanup: Click the "Delete" button for the object, and then go back to the Buckets list and delete your bucket.
