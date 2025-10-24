@@ -1,1 +1,4 @@
 
+Storage options 
+
+https://github.com/priyankavergadia/GCPSketchnote/blob/main/images/storageoptions.jpg
