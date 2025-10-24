@@ -1,0 +1,86 @@
+2. Cloud SQL
+Class Notes: Concepts
+What is it? A fully managed relational database service. GCP handles the "ops" (patching, backups, replication) so you can focus on your data.
+
+Supported Engines:
+
+MySQL
+
+PostgreSQL
+
+SQL Server
+
+Key Features:
+
+Fully Managed: No need to SSH in to update the OS or the database engine.
+
+High Availability (HA): You can configure an instance for HA, which creates a standby instance in a different zone for automatic failover.
+
+Read Replicas: Easily create read-only copies of your database to scale out read-heavy applications.
+
+Automatic Backups: Configured by default.
+
+Security: Connect securely using Private IP (best practice, inside your VPC) or Public IP (requires authorized networks or the Cloud SQL Auth Proxy).
+
+Common Use Cases:
+
+Backend for a traditional web application (e.g., WordPress, Django, Ruby on Rails).
+
+E-commerce platforms, CRMs, and any application requiring ACID-compliant transactions.
+
+Lab 2: The Managed Relational Database
+Goal: Create a managed PostgreSQL instance and connect to it using the Cloud Shell.
+
+Navigate to Cloud SQL: In the GCP Console, go to SQL.
+
+Create an Instance:
+
+Click "Create Instance".
+
+Choose PostgreSQL.
+
+Instance ID: masterclass-db
+
+Password: Set a strong password for the postgres user. Save this password!
+
+Database version: Choose the latest (e.g., PostgreSQL 16).
+
+Preset: Choose Development (this selects a small, cheap db-f1-micro machine).
+
+Region/Zone: Choose a region near you.
+
+Click "Create Instance". (This will take 5-10 minutes).
+
+Connect using Cloud Shell:
+
+Once the instance is ready (green checkmark), click its name (masterclass-db).
+
+On the instance overview page, click the "Connect to this instance" button.
+
+Select the "Open Cloud Shell" option.
+
+A command will be pre-filled in your Cloud Shell terminal (e.g., gcloud sql connect masterclass-db --user=postgres). Press Enter.
+
+If asked to authorize the Cloud SQL Admin API, say y.
+
+Enter the password you created in step 2.
+
+Run SQL Commands:
+
+You are now in the psql shell. Let's create a database and a table.
+
+CREATE DATABASE my_app;
+
+Connect to your new database: \c my_app
+
+CREATE TABLE users (id SERIAL PRIMARY KEY, username VARCHAR(50) NOT NULL);
+
+INSERT INTO users (username) VALUES ('student1'), ('student2');
+
+SELECT * FROM users;
+
+You should see your two new users!
+
+Type \q to exit psql.
+
+Cleanup: Go back to the Cloud SQL console, select your masterclass-db instance, and click "Delete".
