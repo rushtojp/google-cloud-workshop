@@ -1,0 +1,81 @@
+3. Cloud Spanner
+Class Notes: Concepts
+What is it? A globally distributed, strongly consistent, relational database. This is the only database of its kind at this scale.
+
+Key Concepts:
+
+Horizontally Scalable: Unlike Cloud SQL (which scales vertically by getting a bigger machine), Spanner scales horizontally by adding more "nodes."
+
+Globally Distributed: You can have a single database that spans continents (e.g., multi-region nam-eur-asia) with data replicated automatically.
+
+Strongly Consistent (ACID): It provides standard SQL and strong transactional consistency (ACID) across all regions. This is extremely hard to do, and it's Spanner's main selling point.
+
+Common Use Cases:
+
+Mission-critical global applications.
+
+Financial services (where strong consistency is non-negotiable).
+
+Global gaming (e.g., a single leaderboard for all players worldwide).
+
+Logistics and supply chain management.
+
+Spanner vs. Cloud SQL:
+
+Use Cloud SQL for regional, general-purpose relational needs.
+
+Use Spanner when you need global scale and/or horizontal write-scaling with strong consistency.
+
+Lab 3: The Global Relational Database (Demo)
+Goal: Create a Spanner instance and a database, and run a query.
+
+Navigate to Spanner: In the GCP Console, go to Spanner.
+
+Create an Instance:
+
+Click "Create a provisioned instance".
+
+Instance name: masterclass-spanner
+
+Configuration: Choose a Regional config (e.g., us-central1) to keep it simple and lower-cost for the lab.
+
+Compute capacity: Set this to the minimum: 100 processing units.
+
+Click "Create". (This takes a moment).
+
+Create a Database:
+
+Once the instance is ready, click its name.
+
+Click "Create database".
+
+Name: inventory_db
+
+Define your schema (DDL): In the text box, paste the following SQL schema:
+
+SQL
+
+CREATE TABLE Products (
+  ProductId INT64 NOT NULL,
+  ProductName STRING(1024),
+  Stock INT64
+) PRIMARY KEY (ProductId);
+Click "Create".
+
+Insert and Query Data:
+
+In the database menu, click "Data".
+
+Select the Products table and click "Insert".
+
+Add a row: ProductId = 1, ProductName = Laptop, Stock = 100.
+
+Click "Run".
+
+Now, click "Query" in the left menu.
+
+In the query editor, type: SELECT * FROM Products WHERE Stock > 50;
+
+Click "Run". You should see the laptop you just added.
+
+Cleanup: Go back to the Spanner instance list, select masterclass-spanner, and click "Delete".
