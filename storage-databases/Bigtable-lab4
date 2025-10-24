@@ -1,0 +1,74 @@
+4. Cloud Bigtable
+Class Notes: Concepts
+What is it? A petabyte-scale, wide-column NoSQL database. It's the same database that powers many Google services like Search, Analytics, and Maps.
+
+Key Concepts:
+
+NoSQL: It is not relational. It has no joins, no SQL, and a very different data model.
+
+Wide-Column: Data is stored in a table with a single Row Key. Each row can have billions of columns, grouped into "column families."
+
+High Throughput, Low Latency: It is built for speed at scale. It excels at heavy read/write workloads (e.G., 100,000s of operations per second).
+
+Bigtable vs. Spanner:
+
+Use Spanner when you need strong consistency and a relational (SQL) model.
+
+Use Bigtable when you need extreme throughput for analytical or operational data, and a flexible NoSQL schema.
+
+Common Use Cases:
+
+IoT: Storing massive streams of time-series data from sensors.
+
+Ad Tech: Real-time bidding and analytics.
+
+Financial Data: Storing stock market time-series data.
+
+Any large-scale analytical workload where query-by-row-key is dominant.
+
+Lab 4: The High-Throughput NoSQL Database
+Goal: Create a Bigtable instance and use the cbt (Cloud Bigtable CLI) to write and read data.
+
+Open Cloud Shell: This lab is easiest in Cloud Shell.
+
+Enable APIs: Run gcloud services enable bigtable.googleapis.com bigtableadmin.googleapis.com
+
+Create a Bigtable Instance: (We'll use a DEVELOPMENT instance, which is low-cost).
+
+gcloud bigtable instances create masterclass-bigtable --display-name="Masterclass Bigtable" --instance-type=DEVELOPMENT --cluster=my-cluster --cluster-zone=us-central1-b
+
+Configure the cbt CLI:
+
+echo "project = [YOUR_PROJECT_ID]\ninstance = masterclass-bigtable" > ~/.cbtrc
+
+(Replace [YOUR_PROJECT_ID] with your actual project ID)
+
+Create a Table and Column Family:
+
+cbt createtable iot_sensors
+
+cbt createfamily iot_sensors device_data
+
+Write (Set) Data:
+
+The cbt format is cbt set <table> <row_key> <family>:<column>=<value>.
+
+cbt set iot_sensors sensor-001 device_data:temp=25.5
+
+cbt set iot_sensors sensor-001 device_data:humidity=40
+
+cbt set iot_sensors sensor-002 device_data:temp=22.8
+
+Read Data:
+
+Read a specific row: cbt read iot_sensors row=sensor-001
+
+Read the whole table (scan): cbt read iot_sensors
+
+You will see the data you wrote, complete with timestamps.
+
+Cleanup:
+
+gcloud bigtable instances delete masterclass-bigtable
+
+Confirm by typing Y.
