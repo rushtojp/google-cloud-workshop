@@ -1,0 +1,98 @@
+5. Firestore
+Class Notes: Concepts
+What is it? A flexible, scalable document NoSQL database for mobile, web, and server development. It's part of the Firebase platform.
+
+Key Concepts:
+
+Document-Oriented: Data is stored in Documents (which are like JSON objects).
+
+Collections: Documents live in Collections (which are like folders for documents).
+
+Example: A users collection contains user_A and user_B documents. The user_A document contains fields like name: "Alice" and email: "alice@example.com".
+
+Key Features:
+
+Real-time Synchronization: This is its killer feature. When data changes in the database, it's pushed to all connected clients (web/mobile apps) automatically.
+
+Offline Support: The SDKs (Software Development Kits) for web and mobile can cache data locally, so your app works even when the user is offline.
+
+Scales to Zero: It's serverless. If you have no traffic, you pay nothing.
+
+Firestore vs. Bigtable:
+
+Use Firestore for general-purpose web/mobile app development (user profiles, game state, chat messages).
+
+Use Bigtable for massive-scale (petabyte) analytical or time-series data.
+
+Lab 5: The Real-time Document Database
+Goal: Use the GCP Console to manually create a document database structure.
+
+Navigate to Firestore: In the GCP Console, go to Firestore.
+
+Select a Database Mode:
+
+Click "Select Native Mode" (this is the standard Firestore).
+
+Choose a Location:
+
+Select a region near you (e.g., us-central).
+
+Click "Create Database".
+
+Start a Collection:
+
+Click "+ Start Collection".
+
+Collection ID: users
+
+Click "Next".
+
+Create Your First Document:
+
+Document ID: Click "Auto-ID".
+
+Field: name (Type: string) -> Value: Alice
+
+Click "+ Add Field": email (Type: string) -> Value: alice@example.com
+
+Click "+ Add Field": age (Type: number) -> Value: 30
+
+Click "Save".
+
+Add a Second Document:
+
+While in the users collection, click "+ Add Document".
+
+Document ID: bob (we'll set this one manually).
+
+Field: name (string) -> Bob
+
+Field: interests (Type: array)
+
+Value 0: gcp
+
+Click + to add another array value: Value 1: hiking
+
+Click "Save".
+
+Add a Sub-collection:
+
+Click on your alice document (the one with the auto-ID).
+
+Click "+ Start Collection".
+
+Collection ID: orders
+
+Document ID: order-101
+
+Field: item (string) -> Laptop
+
+Field: quantity (number) -> 1
+
+Click "Save".
+
+You have now created a users collection, with a document for alice, which itself contains an orders sub-collection. This is the power of the document model.
+
+Cleanup:
+
+Click the three dots (...) next to the users collection and select "Delete collection". This will delete all documents and sub-collections within it.
