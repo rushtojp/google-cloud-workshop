@@ -1,0 +1,131 @@
+
+Objective: Enable user authentication (Email/Password) in your project and test it with a simple web page.
+
+Enable Identity Platform:
+
+Go to Security > Identity Platform in the console.
+
+Click Enable Identity Platform.
+
+Add an Authentication Provider:
+
+On the Identity Platform page, click Providers.
+
+Click Add a provider.
+
+Select Email/Password from the list.
+
+Click the Enable toggle and click Save.
+
+Create a Test User:
+
+Click the Users tab.
+
+Click Add User.
+
+Enter a test email (e.g., test@example.com) and a password (e.g., password123).
+
+Click Add.
+
+Get Your Web API Key:
+
+Go to APIs & Services > Credentials.
+
+Find the key named Browser key (auto created by Google Service).
+
+Click the "Show Key" icon and copy the key.
+
+Create a Test HTML File:
+
+Create a file on your local computer named index.html.
+
+Paste the following code into it.
+
+Replace [YOUR_API_KEY] with the key you just copied.
+
+Replace [YOUR_PROJECT_ID] with your GCP Project ID.
+
+HTML
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Identity Platform Test</title>
+</head>
+<body>
+    <h1>Identity Platform Test</h1>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button id="signIn">Sign In</button>
+    <button id="signOut" style="display:none;">Sign Out</button>
+    <h2 id="status">Signed Out</h2>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "[YOUR_API_KEY]",
+            authDomain: "[YOUR_PROJECT_ID].firebaseapp.com",
+            projectId: "[YOUR_PROJECT_ID]",
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        const btnSignIn = document.getElementById('signIn');
+        const btnSignOut = document.getElementById('signOut');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const status = document.getElementById('status');
+
+        btnSignIn.onclick = () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    console.log('Signed In!', userCredential.user);
+                })
+                .catch((error) => {
+                    console.error(error);
+                    status.innerText = error.message;
+                });
+        };
+
+        btnSignOut.onclick = () => {
+            auth.signOut();
+        };
+
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                status.innerText = `Signed In as: ${user.email}`;
+                btnSignIn.style.display = 'none';
+                btnSignOut.style.display = 'block';
+            } else {
+                status.innerText = 'Signed Out';
+                btnSignIn.style.display = 'block';
+                btnSignOut.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
+Test:
+
+Open index.html in your web browser (you don't need a web server).
+
+Enter the email (test@example.com) and password (password123) you created.
+
+Click Sign In.
+
+The status text will change to "Signed In as: test@example.com".
+
+Cleanup:
+
+In the Identity Platform > Users console, select and delete the test user.
+
+In the Providers tab, click the pencil icon next to Email/Password and Disable it.
+
+Delete the index.html file from your computer.
