@@ -1,0 +1,66 @@
+5. Lab: VPC Service Controls
+Objective: Prevent data exfiltration by creating a "service perimeter" that blocks access to a GCS bucket from outside your project, even with valid credentials.
+
+Note: This is an advanced lab and requires an Organization in your GCP setup.
+
+Create a Protected GCS Bucket:
+
+Bash
+
+export PROTECTED_BUCKET="vpc-sc-lab-bucket-$(gcloud config get-value project)"
+gcloud storage buckets create gs://$PROTECTED_BUCKET
+Test Access (Outside): From your local terminal (which is "outside" the project's network), verify you can access it.
+
+Bash
+
+gcloud storage ls gs://$PROTECTED_BUCKET
+# This should SUCCEED
+Create a Service Perimeter:
+
+Go to Security > VPC Service Controls in the console.
+
+If this is your first time, you will be prompted to create an Access Policy. This is a one-time setup linked to your organization.
+
+Click New Perimeter.
+
+Perimeter Name: my-lab-perimeter
+
+Perimeter Type: Regular
+
+Projects to Protect: Click Add Projects and select your current project.
+
+Services to Restrict: Click Add Services. Select the Cloud Storage API (storage.googleapis.com).
+
+Click Create.
+
+Wait: It can take 5-10 minutes for the perimeter to propagate.
+
+Test Access (Outside) - The "Aha!" Moment:
+
+From your local terminal again, run the same command:
+
+Bash
+
+gcloud storage ls gs://$PROTECTED_BUCKET
+This should now FAIL! You will get an error like: AccessDeniedException: 403 Request is prohibited by organization's policy. This proves the perimeter is working.
+
+Test Access (Inside):
+
+Open the Cloud Shell in the GCP console (Cloud Shell runs inside your project's trusted boundary).
+
+Run the same command from within Cloud Shell:
+
+Bash
+
+gcloud storage ls gs://$PROTECTED_BUCKET
+This should SUCCEED, because the request is coming from inside the perimeter.
+
+Cleanup:
+
+In the VPC Service Controls console, select my-lab-perimeter and click Delete.
+
+Delete the GCS bucket:
+
+Bash
+
+gcloud storage buckets delete gs://$PROTECTED_BUCKET
