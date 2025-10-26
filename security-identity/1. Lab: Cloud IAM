@@ -1,0 +1,75 @@
+Here are five step-by-step labs, one for each of the Google Cloud security topics you requested.
+
+Important Prerequisites for All Labs
+GCP Project: You must have a Google Cloud Project.
+
+Permissions: You need the Owner or Editor role in the project to enable APIs and create resources.
+
+gcloud CLI: Have the Google Cloud CLI installed and authenticated (gcloud auth login).
+
+Enable APIs: Before starting each lab, you may need to enable its specific API. A good practice is to enable all of them at the start:
+
+Bash
+
+gcloud services enable \
+    iam.googleapis.com \
+    iap.googleapis.com \
+    identityplatform.googleapis.com \
+    cloudkms.googleapis.com \
+    accesscontextmanager.googleapis.com \
+    compute.googleapis.com \
+    storage.googleapis.com
+1. Lab: Cloud IAM (Identity and Access Management)
+Objective: Understand access control by granting a new service account a specific, limited role (Storage Object Viewer) on a single GCS bucket.
+
+Create a GCS Bucket: This will be our resource.
+
+Bash
+
+# Make sure to use a globally unique name
+export BUCKET_NAME="iam-lab-bucket-$(gcloud config get-value project)"
+gcloud storage buckets create gs://$BUCKET_NAME
+Create a Service Account: This will be our "identity" or "principal."
+
+Bash
+
+gcloud iam service-accounts create my-lab-sa --display-name="My Lab Service Account"
+Verify No Access (Optional): Try to use the service account to list the bucket's contents. This will fail. (This step is advanced, as it requires impersonation, so we will skip to the grant).
+
+Grant Access (The Core Task): Assign the roles/storage.objectViewer role to the service account, but only on the bucket you created (this is "least privilege").
+
+Bash
+
+# Get your service account's email
+export SA_EMAIL=$(gcloud iam service-accounts list --filter="displayName='My Lab Service Account'" --format="value(email)")
+
+# Add the IAM policy binding
+gcloud storage buckets add-iam-policy-binding gs://$BUCKET_NAME \
+    --member="serviceAccount:$SA_EMAIL" \
+    --role="roles/storage.objectViewer"
+Verify in Console:
+
+Go to the Cloud Storage console.
+
+Find your bucket (iam-lab-bucket-...).
+
+Click the Permissions tab.
+
+Click View by Principals.
+
+You will see your service account (my-lab-sa) listed with the "Storage Object Viewer" role.
+
+Cleanup:
+
+Bash
+
+# Remove the IAM policy
+gcloud storage buckets remove-iam-policy-binding gs://$BUCKET_NAME \
+    --member="serviceAccount:$SA_EMAIL" \
+    --role="roles/storage.objectViewer"
+
+# Delete the service account
+gcloud iam service-accounts delete $SA_EMAIL --quiet
+
+# Delete the bucket
+gcloud storage buckets delete gs://$BUCKET_NAME
