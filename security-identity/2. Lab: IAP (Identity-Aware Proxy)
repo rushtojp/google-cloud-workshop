@@ -1,0 +1,74 @@
+2. Lab: IAP (Identity-Aware Proxy)
+Objective: Secure a new web server on a Compute Engine VM so that only you (as an authenticated user) can access it, without needing a VPN.
+
+Create a Web Server VM: We'll use a startup script to install Apache.
+
+Bash
+
+gcloud compute instances create "iap-lab-vm" \
+    --zone="us-central1-a" \
+    --machine-type="e2-micro" \
+    --tags="http-server" \
+    --metadata=startup-script="#!/bin/bash
+        sudo apt-get update
+        sudo apt-get install -y apache2
+        echo '<!doctype html><html><body><h1>Secured by IAP!</h1></body></html>' | sudo tee /var/www/html/index.html"
+Create a Firewall Rule: This rule only allows traffic from Google's IAP service. It does not allow traffic from the public internet.
+
+Bash
+
+gcloud compute firewall-rules create "allow-iap-traffic" \
+    --allow=tcp:80 \
+    --source-ranges="35.235.240.0/20" \
+    --target-tags="http-server"
+Configure OAuth Consent Screen: IAP needs to know what to show users when they log in.
+
+Go to the APIs & Services > OAuth consent screen in the console.
+
+Select Internal and click Create.
+
+Fill in the required fields:
+
+App name: "IAP Lab"
+
+User support email: (Your email)
+
+Developer contact information: (Your email)
+
+Click Save and Continue through all steps.
+
+Enable IAP and Grant Access:
+
+Go to Security > Identity-Aware Proxy in the console.
+
+You may be prompted to configure IAP. Click the button to do so.
+
+Find the iap-lab-vm backend service in the list.
+
+Toggle the IAP switch to ON.
+
+In the right-hand panel, click Add Principal.
+
+In the New principals field, add your Google account email.
+
+Select the role IAP-Secured Web App User.
+
+Click Save.
+
+Test:
+
+Find the External IP of your iap-lab-vm in the Compute Engine console.
+
+Try to access http://[YOUR_VM_EXTERNAL_IP]. It will fail (timeout), because the firewall is blocking you.
+
+In the Identity-Aware Proxy console, find your resource and click the URL in the HTTPS column.
+
+You will be prompted to log in with your Google account. After logging in, you will see the "Secured by IAP!" message.
+
+Cleanup:
+
+Bash
+
+gcloud compute instances delete "iap-lab-vm" --zone="us-central1-a" --quiet
+gcloud compute firewall-rules delete "allow-iap-traffic" --quiet
+# You can disable IAP in the console
