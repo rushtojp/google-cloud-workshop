@@ -1,0 +1,21 @@
+Here are five step-by-step labs, one for each of the Google Cloud security topics you requested.
+
+Important Prerequisites for All Labs
+GCP Project: You must have a Google Cloud Project.
+
+Permissions: You need the Owner or Editor role in the project to enable APIs and create resources.
+
+gcloud CLI: Have the Google Cloud CLI installed and authenticated (gcloud auth login).
+
+Enable APIs: Before starting each lab, you may need to enable its specific API. A good practice is to enable all of them at the start:
+
+Bash
+
+gcloud services enable \
+    iam.googleapis.com \
+    iap.googleapis.com \
+    identityplatform.googleapis.com \
+    cloudkms.googleapis.com \
+    accesscontextmanager.googleapis.com \
+    compute.googleapis.com \
+    storage.googleapis.com
