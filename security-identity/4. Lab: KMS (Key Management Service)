@@ -1,0 +1,60 @@
+4. Lab: KMS (Key Management Service)
+Objective: Learn to create an encryption key, use it to encrypt and decrypt data from the command line.
+
+Create a Keyring: A keyring holds and manages your keys.
+
+Bash
+
+gcloud kms keyrings create "my-lab-keyring" --location="global"
+Create a Key: This is the actual cryptographic key used for encryption.
+
+Bash
+
+gcloud kms keys create "my-lab-key" \
+    --keyring="my-lab-keyring" \
+    --location="global" \
+    --purpose="encrypt-decrypt"
+Create Sample Data: Create a file with a secret message.
+
+Bash
+
+echo "This is a secret message." > secret.txt
+Encrypt the Data: Use the key to encrypt the file. The output (secret.enc) will be unreadable binary data.
+
+Bash
+
+gcloud kms encrypt \
+    --key="my-lab-key" \
+    --keyring="my-lab-keyring" \
+    --location="global" \
+    --plaintext-file="secret.txt" \
+    --ciphertext-file="secret.enc"
+Decrypt the Data: Use the same key to decrypt the file.
+
+Bash
+
+gcloud kms decrypt \
+    --key="my-lab-key" \
+    --keyring="my-lab-keyring" \
+    --location="global" \
+    --ciphertext-file="secret.enc" \
+    --plaintext-file="decrypted.txt"
+Verify: Check that the decrypted file matches the original.
+
+Bash
+
+cat decrypted.txt
+# Output: This is a secret message.
+Cleanup:
+
+Go to Security > Key Management in the console.
+
+Find my-lab-key. Click the three dots and select Schedule for destruction. (Keys cannot be deleted immediately to prevent data loss).
+
+After the key is scheduled for destruction (or destroyed, which takes 24h), you can delete the my-lab-keyring.
+
+Remove the local files:
+
+Bash
+
+rm secret.txt secret.enc decrypted.txt
