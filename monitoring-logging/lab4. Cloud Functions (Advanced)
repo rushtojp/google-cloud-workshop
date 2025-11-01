@@ -1,0 +1,166 @@
+4. Cloud Functions (Advanced): Event-Driven Processing
+Objective: Create an event-driven pipeline. You will build two 2nd Gen Cloud Functions:
+
+Function A (HTTP): Receives a web request and writes a file to a Cloud Storage bucket.
+
+Function B (Event-driven): Automatically triggers when the new file appears in the bucket, reads its content, and logs it.
+
+Lab Steps:
+Enable APIs & Create Buckets:
+
+Enable APIs:
+
+Bash
+
+gcloud services enable run.googleapis.com
+gcloud services enable storage.googleapis.com
+gcloud services enable eventarc.googleapis.com
+gcloud services enable cloudfunctions.googleapis.com
+Create two buckets (must be globally unique names):
+
+Bash
+
+# Bucket for Function A to write to
+gsutil mb gs://<YOUR_NAME>-trigger-bucket
+
+# Bucket to stage the function source code
+gsutil mb gs://<YOUR_NAME>-source-bucket
+Create Function B (The Event Receiver):
+
+Go to Cloud Functions -> Create Function.
+
+Environment: 2nd gen.
+
+Function name: process-file-function
+
+Region: us-central1
+
+Trigger: Cloud Storage
+
+Event Type: google.cloud.storage.object.v1.finalized
+
+Bucket: Select your ...-trigger-bucket.
+
+Click Next.
+
+Runtime: Python 3.10 (or your preference).
+
+Entry point: process_file
+
+In requirements.txt, add: google-cloud-storage
+
+In main.py, paste the following:
+
+Python
+
+import functions_framework
+from google.cloud import storage
+
+# Triggered by a new file in the bucket
+@functions_framework.cloud_event
+def process_file(cloud_event):
+    data = cloud_event.data
+    bucket_name = data["bucket"]
+    file_name = data["name"]
+
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(file_name)
+
+    content = blob.download_as_text()
+
+    print(f"Processing file: {file_name}")
+    print(f"File content: {content}")
+Click Deploy.
+
+Create Function A (The HTTP Trigger):
+
+Go to Cloud Functions -> Create Function.
+
+Environment: 2nd gen.
+
+Function name: create-file-function
+
+Region: us-central1
+
+Trigger: HTTPS.
+
+Authentication: Allow unauthenticated invocations (for easier testing in this lab).
+
+Click Next.
+
+Runtime: Python 3.10 (or your preference).
+
+Entry point: create_file
+
+In requirements.txt, add: google-cloud-storage
+
+In main.py, paste the following (replace <YOUR_TRIGGER_BUCKET_NAME>):
+
+Python
+
+import functions_framework
+from google.cloud import storage
+import datetime
+
+# Triggered by HTTP request
+@functions_framework.http
+def create_file(request):
+    bucket_name = "<YOUR_TRIGGER_BUCKET_NAME>" # CHANGE THIS
+
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+
+    file_name = f"upload-{datetime.datetime.now().isoformat()}.txt"
+    blob = bucket.blob(file_name)
+
+    blob.upload_from_string("This file was created by an HTTP call.")
+
+    return f"File {file_name} created in bucket {bucket_name}."
+Click Deploy.
+
+Grant Permissions:
+
+Wait for both functions to deploy.
+
+create-file-function needs permission to write to the bucket.
+
+Go to IAM & Admin -> Service Accounts.
+
+Find the service account for create-file-function (it will have the same name).
+
+Go to Cloud Storage -> Buckets.
+
+Select your ...-trigger-bucket and go to the Permissions tab.
+
+Click Grant Access.
+
+New principals: Paste the service account email.
+
+Role: Storage Object Creator.
+
+Click Save.
+
+Test the Pipeline:
+
+Go to Cloud Functions. Click on create-file-function.
+
+Go to the Trigger tab and copy the HTTPS URL.
+
+Paste the URL into a new browser tab and hit Enter.
+
+You should see a message like "File upload-....txt created..."
+
+Verify the Result:
+
+Go to Cloud Functions. Click on process-file-function.
+
+Go to the Logs tab.
+
+You should see new logs with messages like "Processing file: upload-....txt" and "File content: This file was created by an HTTP call."
+
+Cleanup:
+
+Delete both Cloud Functions (create-file-function and process-file-function).
+
+Delete both Cloud Storage Buckets.
