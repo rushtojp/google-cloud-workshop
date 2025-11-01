@@ -1,0 +1,107 @@
+2. Deployment Manager: Infrastructure as Code (IaC)
+Objective: Learn to deploy a predictable, templated infrastructure. You will first deploy a simple VM from a config file, then templatize it using Jinja to make it reusable.
+
+Lab Steps:
+Enable Cloud Shell & APIs:
+
+Open Cloud Shell (the >_ icon in the top-right).
+
+Enable the required API: gcloud services enable deploymentmanager.googleapis.com
+
+Part 1: Basic Config Deployment
+
+In Cloud Shell, create a config file: nano simple-vm.yaml
+
+Paste the following configuration:
+
+YAML
+
+resources:
+- name: my-first-vm
+  type: compute.v1.instance
+  properties:
+    zone: us-central1-a
+    machineType: zones/us-central1-a/machineTypes/e2-micro
+    disks:
+    - deviceName: boot
+      type: PERSISTENT
+      boot: true
+      autoDelete: true
+      initializeParams:
+        sourceImage: projects/debian-cloud/global/images/family/debian-11
+    networkInterfaces:
+    - network: global/networks/default
+Save and exit (Ctrl+O, Enter, Ctrl+X).
+
+Deploy this configuration:
+
+Bash
+
+gcloud deployment-manager deployments create basic-deployment --config simple-vm.yaml
+Go to Compute Engine to verify my-first-vm was created.
+
+Part 2: Templated Deployment (Jinja)
+
+Now, let's make that reusable. Create a Jinja template: nano vm-template.jinja
+
+Paste this template. Note the {{ env["name"] }} and {{ properties["machineType"] }} variables.
+
+Django
+
+resources:
+- name: {{ env["name"] }}
+  type: compute.v1.instance
+  properties:
+    zone: us-central1-a
+    machineType: zones/us-central1-a/machineTypes/{{ properties["machineType"] }}
+    disks:
+    - deviceName: boot
+      type: PERSISTENT
+      boot: true
+      autoDelete: true
+      initializeParams:
+        sourceImage: projects/debian-cloud/global/images/family/debian-11
+    networkInterfaces:
+    - network: global/networks/default
+Save and exit.
+
+Create a Master Config File:
+
+Create a new YAML file that uses the template: nano prod-deployment.yaml
+
+Paste the following. This file imports the template and passes properties to it.
+
+YAML
+
+imports:
+- path: vm-template.jinja
+
+resources:
+- name: prod-web-server
+  type: vm-template.jinja
+  properties:
+    machineType: e2-medium
+Save and exit.
+
+Deploy the Templated Infrastructure:
+
+Deploy the new configuration:
+
+Bash
+
+gcloud deployment-manager deployments create prod-deployment --config prod-deployment.yaml
+Go to Compute Engine. You will now see both VMs:
+
+my-first-vm (from Part 1)
+
+prod-web-server (from Part 2, with an e2-medium type)
+
+Cleanup:
+
+Delete both deployments. This will also delete the resources (VMs) they manage.
+
+Bash
+
+gcloud deployment-manager deployments delete basic-deployment -q
+gcloud deployment-manager deployments delete prod-deployment -q
+Remove the files: rm simple-vm.yaml vm-template.jinja prod-deployment.yaml
