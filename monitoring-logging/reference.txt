@@ -10,3 +10,7 @@ https://docs.cloud.google.com/deployment-manager/docs
 gcp infrastructure manager - updates
 
 https://docs.cloud.google.com/infrastructure-manager/docs/overview
+
+GCP Cloud Build
+
+https://cloud.google.com/build?hl=en
