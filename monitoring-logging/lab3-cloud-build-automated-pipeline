@@ -1,0 +1,159 @@
+3. Cloud Build: Automated CI/CD Pipeline
+Objective: Create a simple CI/CD pipeline. You will write a "Hello World" Python app, containerize it with Docker, and configure Cloud Build to automatically build and push the container image to Artifact Registry on every code change.
+
+Lab Steps:
+Setup Repositories:
+
+Enable APIs:
+
+Bash
+
+gcloud services enable sourcerepo.googleapis.com
+gcloud services enable artifactregistry.googleapis.com
+gcloud services enable cloudbuild.googleapis.com
+Create a Cloud Source Repository to host your code:
+
+Bash
+
+gcloud source repos create my-app-repo
+Create an Artifact Registry repository to store your Docker images:
+
+Bash
+
+gcloud artifacts repos create my-docker-repo \
+  --repository-format=docker \
+  --location=us-central1 \
+  --description="My Docker Repo"
+Create Application Files:
+
+Clone your new empty repo:
+
+Bash
+
+gcloud source repos clone my-app-repo
+cd my-app-repo
+Create a simple Python Flask app file: nano main.py
+
+Python
+
+from flask import Flask
+import os
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+    return 'Hello, Cloud Build!'
+
+if __name__ == "__main__":
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+Create a dependencies file: nano requirements.txt
+
+Flask
+Create a Dockerfile to containerize the app:
+
+Dockerfile
+
+FROM python:3.9-slim
+WORKDIR /app
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+COPY . .
+ENV PORT=8080
+CMD ["python", "main.py"]
+Create the Cloud Build Config:
+
+Create the build pipeline definition: nano cloudbuild.yaml
+
+Note: Replace <PROJECT_ID> with your actual Project ID.
+
+YAML
+
+steps:
+# 1. Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'build', 
+    '-t', 
+    'us-central1-docker.pkg.dev/<PROJECT_ID>/my-docker-repo/my-app:latest', 
+    '.'
+  ]
+
+# 2. Push the container image to Artifact Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: [
+    'push', 
+    'us-central1-docker.pkg.dev/<PROJECT_ID>/my-docker-repo/my-app:latest'
+  ]
+
+# Tell Cloud Build to list this image in the build results
+images:
+- 'us-central1-docker.pkg.dev/<PROJECT_ID>/my-docker-repo/my-app:latest'
+Run a Manual Build:
+
+Commit all your files:
+
+Bash
+
+git add .
+git commit -m "Initial commit"
+git push origin master
+Run your first build manually:
+
+Bash
+
+gcloud builds submit --config cloudbuild.yaml .
+Go to Cloud Build in the console to watch the build run.
+
+When it's done, go to Artifact Registry -> my-docker-repo and verify my-app image is there.
+
+Create an Automated Trigger:
+
+Go to Cloud Build -> Triggers.
+
+Click Create Trigger.
+
+Name: push-to-master
+
+Region: us-central1
+
+Event: Push to a branch
+
+Source: Select my-app-repo
+
+Branch: master
+
+Configuration: Cloud Build configuration file (yaml or json)
+
+Location: /cloudbuild.yaml
+
+Click Create.
+
+Test the Trigger:
+
+Go back to Cloud Shell. Make a small change to the app:
+
+Bash
+
+nano main.py
+# Change 'Hello, Cloud Build!' to 'Hello, Automated Trigger!'
+Commit and push the change:
+
+Bash
+
+git add main.py
+git commit -m "Testing trigger"
+git push origin master
+Go to the Cloud Build -> History page. You will see a new build running automatically, triggered by your push.
+
+Cleanup:
+
+Delete the Cloud Build Trigger.
+
+Delete the my-app image from Artifact Registry.
+
+Delete the my-docker-repo Artifact Registry repository.
+
+Delete the my-app-repo Cloud Source Repository.
+
+cd .. and rm -rf my-app-repo.
