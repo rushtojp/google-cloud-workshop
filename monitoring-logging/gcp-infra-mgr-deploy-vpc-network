@@ -1,0 +1,89 @@
+Lab Exercise: Deploy a VPC Network
+This lab guides you through deploying a simple Virtual Private Cloud (VPC) network using a pre-made Terraform configuration stored in a public Git repository.
+
+Objective
+Use Infrastructure Manager to deploy, view, and then destroy a simple GCP resource.
+
+Step 1: Prerequisites
+Before you start, you must enable the necessary APIs in your Google Cloud project.
+
+Go to the Google Cloud Console.
+
+Select your project.
+
+Enable the following APIs (you can search for them in the "APIs & Services" dashboard):
+
+Cloud Build API
+
+Infrastructure Manager API
+
+Service Usage API
+
+You will also need the Cloud Config Admin (roles/config.admin) IAM role on your project.
+
+Step 2: Create the Deployment
+You will deploy a simple configuration from a public Google-hosted Git repository. This configuration just creates a single VPC network.
+
+In the Cloud Console, navigate to Infrastructure Manager (you can use the search bar).
+
+Click Deployments.
+
+Click Create.
+
+Deployment Name: Give your deployment a unique name, like vpc-test-deployment.
+
+Region: Select a region (e.g., us-central1). This is the region where the Infrastructure Manager service will run.
+
+Source: Select Git repository.
+
+Source Repository: Enter https://github.com/GoogleCloudPlatform/cloud-foundation-fabric.git
+
+Git Directory: Enter infrastructure-manager/quickstart (This points to the sub-folder containing the Terraform code).
+
+Git Reference: Select Branch and enter main.
+
+Terraform Version: Select a version (e.g., 1.7.5 or the latest available).
+
+Service Account: Select the Compute Engine default service account. For production, you'd create a dedicated service account with minimal permissions.
+
+Click Continue.
+
+Step 3: Set Variables & Deploy
+The next page shows the input variables defined in the Terraform code.
+
+The quickstart module requires a project_id.
+
+Under Input Values, click Add Variable.
+
+Name: project_id
+
+Type: String
+
+Value: Enter your Project ID.
+
+Click Create.
+
+Infrastructure Manager will now initialize, run a terraform plan (which you can see in the Preview tab), and, if successful, automatically run terraform apply to create the resources. This may take a few minutes.
+
+Step 4: Verify Your Resources
+Once the deployment State shows "Active," your resources are live.
+
+In the Cloud Console, navigate to VPC network.
+
+You should see a new network named im-quickstart-vpc. This confirms the deployment was successful.
+
+You can also go back to the Infrastructure Manager page, click your deployment, and view the Resources tab to see what it manages.
+
+Step 5: Clean Up (Destroy Resources)
+On the Infrastructure Manager deployments page, find your vpc-test-deployment.
+
+Click the three-dot menu on the right and select Delete.
+
+This will trigger a terraform destroy operation, which will safely delete the im-quickstart-vpc network and all associated resources.
+
+Official Quickstart Guide
+For a detailed, step-by-step guide with screenshots and gcloud command-line instructions, you can follow the official Google Cloud documentation.
+
+Google Cloud Documentation: Quickstart: Deploy a VPC with Infrastructure Manager
+
+https://cloud.google.com/infrastructure-manager/docs
