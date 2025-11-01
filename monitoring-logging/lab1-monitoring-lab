@@ -1,0 +1,120 @@
+1. Monitoring and Logging: The "Four Golden Signals"
+Objective: Learn to monitor a web server using the "Four Golden Signals" (Latency, Traffic, Errors, Saturation). You will deploy a VM, view its logs and metrics, create a custom dashboard, and set an alert for high CPU.
+
+Lab Steps:
+Deploy a Resource:
+
+Go to Compute Engine -> VM instances.
+
+Click Create Instance.
+
+Name it monitoring-lab-vm.
+
+Region: us-central1, Zone: us-central1-a.
+
+Machine type: e2-small.
+
+Boot disk: Keep the default (Debian).
+
+Firewall: Check Allow HTTP traffic.
+
+Click Create.
+
+Install a Web Server & Generate Logs:
+
+Once the VM is running, click the SSH button to open a terminal.
+
+In the SSH terminal, update and install the Nginx web server:
+
+Bash
+
+sudo apt-get update
+sudo apt-get install -y nginx stress
+Use the stress command to generate some CPU load:
+
+Bash
+
+# This will run a CPU-intensive task for 120 seconds
+stress --cpu 1 --timeout 120s &
+Generate a custom log message:
+
+Bash
+
+logger "HELLO_LOGGING_LAB"
+Explore Cloud Logging (Logs Explorer):
+
+Navigate to Logging -> Logs Explorer.
+
+In the "Query" builder, select:
+
+Resource: VM Instance -> monitoring-lab-vm
+
+Log name: syslog
+
+In the search bar, type HELLO_LOGGING_LAB and hit Enter. You should find the custom log message you generated.
+
+Remove the search term. Look for logs from nginx to see access/error logs.
+
+Explore Cloud Monitoring (Metrics Explorer):
+
+Navigate to Monitoring -> Metrics Explorer.
+
+In the "Metric" selector:
+
+Resource type: VM Instance
+
+Metric: Compute -> CPU -> Utilization
+
+You should see a chart showing the CPU utilization. Find the spike caused by the stress command.
+
+Change the Aggregation from mean to max to see the peak usage.
+
+Create a Custom Dashboard:
+
+Navigate to Monitoring -> Dashboards.
+
+Click Create Dashboard. Name it Web Server Status.
+
+Click Add Chart.
+
+Use the "Metric" selector (like in step 4) to select VM Instance -> CPU -> Utilization. Click Apply.
+
+Click Add Chart again.
+
+Select VM Instance -> Network -> Received bytes. Click Apply.
+
+You now have a custom dashboard showing your VM's key metrics.
+
+Create an Alerting Policy:
+
+Navigate to Monitoring -> Alerting.
+
+Click Create Policy.
+
+Click Select a Metric. Choose VM Instance -> CPU -> Utilization.
+
+Set the Rolling window to 1 min.
+
+Under Configure trigger, set Threshold to 50 (for 50%).
+
+Click Next.
+
+Under Notification Channels, click Manage Notification Channels.
+
+Add your Email as a channel (you will need to verify it).
+
+Once added, select your email channel for the alert.
+
+Name the alert High CPU on lab-vm.
+
+Click Next and Create Policy.
+
+(Optional: Run the stress command again to trigger the alert and get an email).
+
+Cleanup:
+
+Delete the Alerting Policy.
+
+Delete the Dashboard.
+
+Delete the monitoring-lab-vm VM instance.
