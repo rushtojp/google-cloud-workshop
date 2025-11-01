@@ -2,3 +2,11 @@
 monitoring ecommerce apps
 
 https://cloud.google.com/blog/products/management-tools/observability-on-google-cloud
+
+gcp deployment manager end of life
+
+https://docs.cloud.google.com/deployment-manager/docs
+
+gcp infrastructure manager - updates
+
+https://docs.cloud.google.com/infrastructure-manager/docs/overview
