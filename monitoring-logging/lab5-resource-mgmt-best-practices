@@ -1,0 +1,115 @@
+5. Resource Management Best Practices
+Objective: Learn to manage resources securely and efficiently using IAM, labels, and budgets. You will create a custom IAM role, apply labels for cost tracking, and set a billing budget alert.
+
+Lab Steps:
+Resource Labeling:
+
+Go to Compute Engine -> Create Instance.
+
+Name it labeled-vm.
+
+Region: us-central1.
+
+Before creating, expand Management, security, disks... -> Labels.
+
+Click Add Label and add the following:
+
+Key: env
+
+Value: dev
+
+Click Add Label again:
+
+Key: team
+
+Value: analytics
+
+Click Create. These labels can now be used to filter costs in billing reports.
+
+Create a Custom IAM Role (Least Privilege):
+
+Go to IAM & Admin -> Roles.
+
+Click Create Role.
+
+Title: VM Operator
+
+ID: vmOperator
+
+Click Add Permissions.
+
+Filter for and add the following permissions:
+
+compute.instances.get
+
+compute.instances.start
+
+compute.instances.stop
+
+compute.instances.list
+
+Click Add, then Create.
+
+Create a Service Account and Apply the Custom Role:
+
+Go to IAM & Admin -> Service Accounts.
+
+Click Create Service Account.
+
+Name: vm-operator-sa
+
+Click Create and Continue.
+
+In the "Grant this service account access to project" step:
+
+Click Select a role.
+
+In the filter, type VM Operator and select your custom role.
+
+Click Continue, then Done.
+
+Concept Check: This service account can now only start, stop, and list VMs. It cannot create new ones or delete them. This is the principle of least privilege.
+
+Set a Billing Budget:
+
+Go to Billing.
+
+Select your Billing Account.
+
+On the left, click Budgets & alerts.
+
+Click Create Budget.
+
+Name: My Project Budget
+
+Projects: Select your current project.
+
+Amount:
+
+Budget type: Specified amount.
+
+Target amount: $20 (or any small amount).
+
+Actions:
+
+Under Percentage of budget, check:
+
+50% of Actual
+
+90% of Actual
+
+100% of Forecasted
+
+Check Email alerts to billing admins and users.
+
+Click Finish. This will now notify you if your spending approaches this limit, preventing unexpected costs.
+
+Cleanup:
+
+Delete the Budget.
+
+Go to IAM & Admin -> Roles, find VM Operator, and delete it.
+
+Go to IAM & Admin -> Service Accounts, find vm-operator-sa, and delete it.
+
+Go to Compute Engine and delete labeled-vm.
