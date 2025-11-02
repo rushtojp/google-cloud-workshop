@@ -14,3 +14,7 @@ https://docs.cloud.google.com/architecture/blueprints/security-foundations
 azure architecture center
 
 https://learn.microsoft.com/en-us/azure/architecture/web-apps/
+
+Google web application examples
+
+https://github.com/GoogleCloudPlatform/terraform-google-enterprise-application/tree/main/examples
