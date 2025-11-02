@@ -1,0 +1,58 @@
+Launching a Managed Instance Group in Compute Engine
+Introduction
+In this lab, you will learn how to create an instance template and customize it to your needs, create a managed instance group that uses the instance template, and learn how to stress test your instances to make sure your configuration works!
+
+Solution
+Logging In
+ 
+
+On the lab page, click Open Link in Incognito Window to copy the link for Google Cloud Platform. Then, paste and open the link in an incognito window or private browser session.
+Sign in to Google Cloud Platform using the credentials provided on the lab page.
+On the Welcome to your new account screen, review the text, and click Accept.
+On the Welcome Cloud Student! screen, check to agree to the terms of service, and select your country of residence.
+Click Agree and Continue.
+Create an Instance Template
+In the Google Cloud console, click More Products in the lefthand navigation menu.
+Under Compute, click Compute Engine.
+In the sub-menu, click Instance templates.
+Click Create Instance Template.
+Under Machine Type, select e2-micro.
+Under Firewall, click the check boxes next to Allow HTTP traffic and Allow HTTPS traffic.
+Click Create. This will create your instance template.
+In the lefthand navigation menu, click Health checks.
+Click Create a health check.
+Under Name, enter acloud-hc.
+Under Check interval, enter 10 for 10 seconds.
+Under Timeout, enter 5 for five seconds.
+Click Create.
+Create a Managed Instance Group
+In the lefthand navigation menu, click on Instance templates.
+Click the checkbox next to the instance template that we created.
+Under Actions, click the three-dot menu and click Create Instance Group.
+Under Name, enter instance-group-1.
+Under Instance template, select instance-template-1.
+Under Maximum number of instances, enter 3.
+Under Health check, select acloud-hc (TCP).
+Click Create. This may take a few minutes to create the instance group.
+Once it is created, click on the newly created instance group. It should show that the instance is being verified and health check is unknown.
+In the lefthand navigation menu, click VM instances. You should see the instance is actually up and running.
+Test and Stress the Managed Instance Group
+Click on SSH. This should open a new terminal window or tab.
+
+Install the stress tool:
+
+sudo apt-get install stress -y
+Stress the instance with eight workers over a timeout of 20 seconds:
+
+sudo stress --cpu 8 --timeout 20
+While the stress tool is running, you may need to wait a few minutes to see what it does.
+
+Check the average load of each Compute Engine instance:
+
+uptime
+Return to the Google Cloud console and navigate to the page showing our newly created instance.
+
+Hit the Refresh button in the console. You should now see that we have three instances running because of the stress we put on the instance group.
+
+Conclusion
+Congratulations — you've completed this hands-on lab!
