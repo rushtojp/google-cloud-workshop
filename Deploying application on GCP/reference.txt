@@ -9,3 +9,8 @@ https://cloud.google.com/blog/topics/developers-practitioners/devops-and-cicd-go
 security architecture details
 
 https://docs.cloud.google.com/architecture/blueprints/security-foundations
+
+
+azure architecture center
+
+https://learn.microsoft.com/en-us/azure/architecture/web-apps/
