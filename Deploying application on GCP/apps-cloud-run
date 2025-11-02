@@ -1,0 +1,101 @@
+1. Application Deployment (The "Hello World" Labs)
+Objective: Learn the fundamental, one-time deployment process for GCP's core compute platforms. This lab has you deploy the same simple container to three different services to understand their differences.
+
+Prerequisite: You'll need a simple "Hello World" container image. You can use Google's pre-built one: us-docker.pkg.dev/google-samples/containers/gke/hello-app:1.0.
+
+Lab 1a: Deploy to Cloud Run (Serverless Containers)
+Goal: Deploy a container that scales to zero, paying only for what you use.
+
+Go to Console: Navigate to the Cloud Run service.
+
+Create Service: Click "Create Service".
+
+Configure:
+
+Select "Deploy one revision from an existing container image".
+
+Set the Container image URL to us-docker.pkg.dev/google-samples/containers/gke/hello-app:1.0.
+
+Give your service a name (e.g., hello-cloud-run).
+
+Select a Region (e.g., us-central1).
+
+Under Authentication, select "Allow unauthenticated invocations" to make it public.
+
+Deploy: Click "Create".
+
+Verify: After a minute, a URL will appear at the top of your service's page. Click it to see your "Hello, world!" application.
+
+Lab 1b: Deploy to Google Kubernetes Engine (GKE)
+Goal: Deploy the same container on a managed Kubernetes cluster.
+
+Create Cluster: Navigate to Kubernetes Engine (GKE). Click "Create" and provision a simple Autopilot cluster. This may take a few minutes.
+
+Connect to Cluster: Once the cluster is ready, click the three-dot menu next to it and select "Connect". Run the gcloud ... get-credentials command in your Cloud Shell.
+
+Create Deployment: In Cloud Shell, create a file named deployment.yaml:
+
+YAML
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: hello
+  template:
+    metadata:
+      labels:
+        app: hello
+    spec:
+      containers:
+      - name: hello-app
+        image: us-docker.pkg.dev/google-samples/containers/gke/hello-app:1.0
+        ports:
+        - containerPort: 8080
+Apply Deployment: Run kubectl apply -f deployment.yaml.
+
+Expose Service: To make it public, create a service.yaml file:
+
+YAML
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: hello
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+Apply Service: Run kubectl apply -f service.yaml.
+
+Verify: Run kubectl get service hello-service. Wait a minute for the EXTERNAL-IP to be assigned. Open that IP address in your browser.
+
+Lab 1c: Deploy to App Engine (Flexible Environment)
+Goal: Deploy a container to a PaaS (Platform-as-a-Service) environment.
+
+Create app.yaml: In Cloud Shell, create a directory for your app. Inside, create a file named app.yaml:
+
+YAML
+
+runtime: custom
+env: flex
+
+# This setting is required for custom runtimes
+manual_scaling:
+  instances: 1
+Create Dockerfile: In the same directory, create a file named Dockerfile (even though we are using a pre-built image, App Engine Flex needs this file to understand it's a custom runtime):
+
+Dockerfile
+
+FROM us-docker.pkg.dev/google-samples/containers/gke/hello-app:1.0
+Deploy: From that directory, run gcloud app deploy.
+
+Verify: When the command finishes, it will provide a URL. Open it to see your application.
