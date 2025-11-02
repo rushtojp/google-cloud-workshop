@@ -1,3 +1,7 @@
 monolith - microservices app
 
 https://github.com/googlecodelabs/monolith-to-microservices
+
+cloud build
+
+https://cloud.google.com/blog/topics/developers-practitioners/devops-and-cicd-google-cloud-explained
