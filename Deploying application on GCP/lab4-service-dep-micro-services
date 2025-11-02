@@ -1,0 +1,33 @@
+4. Service Deployment (Microservices)
+Objective: Deploy two separate services (a frontend and a backend) and configure secure, internal-only communication between them.
+
+Lab: Frontend/Backend on Cloud Run
+Deploy Backend:
+
+Use the same hello-app:1.0 image from Lab 1a.
+
+Deploy it to Cloud Run, but this time, call the service backend-service.
+
+Under Ingress, select "Internal". This means it cannot be accessed from the public internet, only from within your GCP project.
+
+Deploy Frontend:
+
+Deploy the hello-app:2.0 image as a new Cloud Run service named frontend-service.
+
+Set Ingress to "Allow all traffic" (public).
+
+Configure Networking:
+
+To allow your frontend-service to talk to the backend-service, you must configure a Serverless VPC Access connector.
+
+Go to VPC Network > Serverless VPC Access and create a new connector. This links your serverless services to your VPC.
+
+Go back to your frontend-service in Cloud Run. Click Edit.
+
+Go to the Networking tab.
+
+Under VPC Egress, select the connector you just created.
+
+Set Egress to "Route all traffic to VPC".
+
+Test: In your frontend-service code (you would have to modify the code for a real app), you would now be able to make an HTTP request to the internal URL of the backend-service (e.g., http://backend-service-....run.app). Since the frontend is public, you have successfully exposed a public API that securely consumes an internal backend.
