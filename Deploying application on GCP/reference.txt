@@ -5,3 +5,7 @@ https://github.com/googlecodelabs/monolith-to-microservices
 cloud build
 
 https://cloud.google.com/blog/topics/developers-practitioners/devops-and-cicd-google-cloud-explained
+
+security architecture details
+
+https://docs.cloud.google.com/architecture/blueprints/security-foundations
