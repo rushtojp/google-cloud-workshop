@@ -1,0 +1,61 @@
+3. Continuous Delivery (CI/CD)
+Objective: Fully automate the entire process from a code change to production deployment.
+
+Fork Repo: Fork this simple "hello-cloudbuild" app into your own GitHub account.
+
+Connect Repo: Go to Cloud Build in the GCP console.
+
+Go to the Triggers tab.
+
+Click "Connect repository" and select your new fork.
+
+Create Trigger:
+
+Click "Create trigger".
+
+Give it a name (e.g., push-to-main).
+
+Set Event to "Push to a branch".
+
+Set Branch to ^main$.
+
+For Configuration, select "Cloud Build configuration file (yaml or json)". The file cloudbuild.yaml is already in the repo.
+
+Click "Create".
+
+Edit cloudbuild.yaml: The cloudbuild.yaml in that repo only builds the image. Edit the file in your GitHub repo and add a deploy step at the end to deploy to Cloud Run:
+
+YAML
+
+steps:
+# 1. Build the container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/hello-cloud-run:$COMMIT_SHA', '.']
+# 2. Push the image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/$PROJECT_ID/hello-cloud-run:$COMMIT_SHA']
+# 3. Deploy the image to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+    - 'run'
+    - 'deploy'
+    - 'hello-from-ci' # New service name
+    - '--image'
+    - 'gcr.io/$PROJECT_ID/hello-cloud-run:$COMMIT_SHA'
+    - '--region'
+    - 'us-central1'
+    - '--platform'
+    - 'managed'
+    - '--allow-unauthenticated'
+images:
+- 'gcr.io/$PROJECT_ID/hello-cloud-run:$COMMIT_SHA'
+Grant Permissions: Go to IAM & Admin > Service Accounts. Find the Cloud Build service account (it looks like [PROJECT-NUMBER]@cloudbuild.gserviceaccount.com).
+
+Grant it the "Cloud Run Admin" role.
+
+Grant it the "Service Account User" role.
+
+Trigger Pipeline: In your forked repo, make a small change to the main.go file (e.g., change "Hello, world!" to "Hello, CI/CD!"). Commit and push the change to your main branch.
+
+Verify: Go to the Cloud Build "History" tab. You will see your new build running. After it succeeds, go to Cloud Run and find your new service hello-from-ci. Open its URL to see your change.
