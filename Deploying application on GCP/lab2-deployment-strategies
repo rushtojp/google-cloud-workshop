@@ -1,0 +1,60 @@
+2. Deployment Strategies
+Objective: Learn to deploy updates safely with minimal to zero downtime. These labs assume you have the "hello-app:1.0" from Lab 1b already running in GKE.
+
+You will now deploy us-docker.pkg.dev/google-samples/containers/gke/hello-app:2.0.
+
+Lab 2a: Rolling Update (The GKE Default)
+Goal: Observe how GKE gradually replaces old pods with new ones, one by one.
+
+Watch Pods: In one Cloud Shell terminal, run kubectl get pods -w to watch the pods.
+
+Trigger Update: In a second Cloud Shell terminal, update the image for your deployment:
+
+Bash
+
+kubectl set image deployment/hello-deployment hello-app=us-docker.pkg.dev/google-samples/containers/gke/hello-app:2.0
+Observe: In the first terminal, you will see new pods with version 2.0 being created (ContainerCreating) and old pods being terminated (Terminating) one after another. During this time, traffic is served by a mix of v1.0 and v2.0.
+
+Verify: Once complete, check the EXTERNAL-IP from Lab 1b. You should now see "Hello, world! Version: 2.0.0".
+
+Lab 2b: Canary Deployment (Phased Rollout)
+Goal: Release a new version (v2.0) to a small subset of users (e.g., 10%) before a full rollout. We will use Cloud Deploy for this.
+
+Define Pipeline: Create a clouddeploy.yaml file to define a delivery pipeline:
+
+YAML
+
+apiVersion: deploy.cloud.google.com/v1
+kind: DeliveryPipeline
+metadata:
+  name: hello-app-pipeline
+description: main application pipeline
+serialPipeline:
+  stages:
+  - targetId: gke-prod
+    strategy:
+      canary:
+        runtimeConfig:
+          kubernetes:
+            serviceNetworking:
+              service: "hello-service" # The service from Lab 1b
+              deployment: "hello-deployment" # The deployment from Lab 1b
+        canaryDeployment:
+          percentages: [10] # Start with 10% traffic
+          verify: true # Pause for manual verification
+Define Target: Create a target.yaml file to define your GKE cluster as a target:
+
+YAML
+
+apiVersion: deploy.cloud.google.com/v1
+kind: Target
+metadata:
+  name: gke-prod
+description: GKE production cluster
+gke:
+  cluster: "projects/YOUR_PROJECT_ID/locations/YOUR_CLUSTER_LOCATION/clusters/YOUR_CLUSTER_NAME"
+Apply Files: Run gcloud deploy apply --file=clouddeploy.yaml and gcloud deploy apply --file=target.yaml.
+
+Create Release: Create a new release in Cloud Deploy (using the skaffold.yaml it requires) that points to the hello-app:2.0 image.
+
+Observe: In the Cloud Deploy UI, you will see the pipeline create the new version and shift 10% of traffic. It will then pause, waiting for your manual approval to proceed to 100%.
